@@ -3,6 +3,7 @@ package vision
 import (
 	"github.com/RoboCup-SSL/ssl-go-tools/sslproto"
 	"math"
+	"strconv"
 )
 
 var white = "white"
@@ -16,6 +17,7 @@ var botRadius = float64(90)
 var center2Dribbler = float64(75)
 var noFill = float32(0)
 var botStrokeWidth = float32(10)
+var ballStrokeWidth = float32(0)
 
 func ProtoToPackage(frame *sslproto.SSL_DetectionFrame, geometry *sslproto.SSL_GeometryData) *Package {
 
@@ -30,10 +32,12 @@ func ProtoToPackage(frame *sslproto.SSL_DetectionFrame, geometry *sslproto.SSL_G
 
 	for _, bot := range frame.RobotsBlue {
 		pack.Paths = append(pack.Paths, createBotPath(bot, blue))
+		pack.Texts = append(pack.Texts, createBotId(bot, white))
 	}
 
 	for _, bot := range frame.RobotsYellow {
 		pack.Paths = append(pack.Paths, createBotPath(bot, yellow))
+		pack.Texts = append(pack.Texts, createBotId(bot, black))
 	}
 
 	return pack
@@ -44,7 +48,8 @@ func createBallShape(ball *sslproto.SSL_DetectionBall) Circle {
 		Center: Point{*ball.X, *ball.Y},
 		Radius: ballRadius,
 		Style: Style{
-			Fill: &orange,
+			StrokeWidth: &ballStrokeWidth,
+			Fill:        &orange,
 		},
 	}
 }
@@ -136,6 +141,16 @@ func createBotPath(bot *sslproto.SSL_DetectionRobot, fillColor string) Path {
 			Fill:        &fillColor,
 			Stroke:      &black,
 			StrokeWidth: &botStrokeWidth,
+		},
+	}
+}
+
+func createBotId(bot *sslproto.SSL_DetectionRobot, strokeColor string) Text {
+	return Text{
+		Text: strconv.Itoa(int(*bot.RobotId)),
+		P:    Point{*bot.X, *bot.Y},
+		Style: Style{
+			Fill: &strokeColor,
 		},
 	}
 }

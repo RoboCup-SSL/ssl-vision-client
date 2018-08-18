@@ -65,7 +65,7 @@ let defaultField = {
                     args: [925, -550]
                 }
             ],
-            stroke: 'white',
+            stroke: 'black',
             strokeWidth: '10',
             fill: 'yellow',
             fillOpacity: 1
@@ -75,12 +75,7 @@ let defaultField = {
         {
             text: '1',
             p: {x: 990, y: -510},
-            d: {x: -40, y: 45},
-            textLength: 110,
-            strokeWidth: 0,
             fill: 'black',
-            font: 'bold 7em sans-serif',
-            fillOpacity: 1
         }
     ]
 };

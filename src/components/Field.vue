@@ -38,11 +38,7 @@
                   :key="'text-' + i"
                   :x="t.p.x"
                   :y="t.p.y"
-                  :dx="t.d.x"
-                  :dy="t.d.y"
-                  :textLength="t.textLength"
-                  :lengthAdjust="'spacingAndGlyphs'"
-                  :style="[defStyle, t]">
+                  :style="[defStyle, defFontStyle, t]">
                 {{t.text}}
             </text>
         </g>
@@ -65,7 +61,18 @@
                     return {
                         strokeWidth: 10,
                         stroke: 'white',
-                        fillOpacity: 0
+                        fillOpacity: 1,
+                    }
+                }
+            },
+            defFontStyle: {
+                type: Object,
+                default: function () {
+                    return {
+                        strokeWidth: 0,
+                        textAnchor: "middle",
+                        dominantBaseline: "central",
+                        font: "bold 7em sans-serif",
                     }
                 }
             },
