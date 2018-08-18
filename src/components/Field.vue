@@ -1,6 +1,9 @@
 <template>
     <svg id="field-canvas"
          ref="canvas"
+         v-on:mousemove="onMouseMove"
+         v-on:mousedown="onMouseDown"
+         v-on:mouseup="onMouseUp"
          :viewBox="viewBox">
 
         <!-- rotate field -->
@@ -11,6 +14,7 @@
                   :y="-(field.fieldWidth/2+field.boundaryWidth)"
                   :width="field.fieldLength+field.boundaryWidth*2"
                   :height="field.fieldWidth+field.boundaryWidth*2"
+                  ref="background"
                   :style="{fill: 'green', fillOpacity: 1, stroke: 'none'}"></rect>
 
             <line v-for="(l,i) of field.lines"
@@ -77,29 +81,51 @@
         },
         data() {
             return {
-                canvasWidth: 0,
-                canvasHeight: 0,
+                canvasWidth: 1,
+                canvasHeight: 1,
                 zoom: 1.0,
+                translation: {x: 0, y: 0},
+                activeTranslation: {x: 0, y: 0},
+                mouseDownPoint: null,
             }
         },
         computed: {
-            rotateField() {
-                return this.fieldRatio < this.viewPortRatio;
+            fieldToPixelRatioX() {
+                if (this.rotateField) {
+                    return (this.field.fieldWidth + this.field.boundaryWidth * 2) / this.canvasWidth;
+                }
+                return (this.field.fieldLength + this.field.boundaryWidth * 2) / this.canvasWidth;
             },
-            fieldRatio() {
+            fieldToPixelRatioY() {
+                if (this.rotateField) {
+                    return (this.field.fieldLength + this.field.boundaryWidth * 2) / this.canvasHeight;
+                }
+                return (this.field.fieldWidth + this.field.boundaryWidth * 2) / this.canvasHeight;
+            },
+            fieldTranslationX() {
+                return (this.translation.x + this.activeTranslation.x) * this.fieldToPixelRatioX;
+            },
+            fieldTranslationY() {
+                return (this.translation.y + this.activeTranslation.y) * this.fieldToPixelRatioY;
+            },
+            rotateField() {
+                return this.meanFieldRatio < this.canvasRatio;
+            },
+            meanFieldRatio() {
                 let wl = this.field.fieldWidth / this.field.fieldLength;
                 let lw = this.field.fieldLength / this.field.fieldWidth;
                 return (wl + lw) / 2;
             },
-            viewPortRatio() {
+            canvasRatio() {
                 return this.canvasHeight / this.canvasWidth;
             },
             getFieldTransformation() {
-                let scale = 'scale(' + this.zoom + ')';
+                let scale = 'scale(' + this.zoom + ') ';
+                let transform = 'translate(' + this.fieldTranslationX + ',' + this.fieldTranslationY + ') ';
                 if (this.rotateField) {
-                    return 'rotate(90) ' + scale;
+                    return transform + scale + 'rotate(90)';
                 }
-                return scale;
+                return transform + scale;
             },
             viewBox() {
                 if (this.rotateField) {
@@ -129,10 +155,10 @@
                 return d;
             },
             updateCanvasWidth() {
-                this.canvasWidth = this.$refs.canvas.scrollWidth;
+                this.canvasWidth = this.$refs.canvas.clientWidth;
             },
             updateCanvasHeight() {
-                this.canvasHeight = this.$refs.canvas.scrollHeight;
+                this.canvasHeight = this.$refs.canvas.clientHeight;
             },
             textTransform(p) {
                 if (this.rotateField) {
@@ -141,11 +167,39 @@
                 return '';
             },
             onScroll(event) {
-                let newZoom = this.zoom - event.deltaY / 500;
+                let newZoom = this.zoom - event.deltaY / 300;
                 if (newZoom < 1) {
                     this.zoom = 1;
                 } else {
                     this.zoom = newZoom;
+                }
+            },
+            onMouseMove(event) {
+                if (this.mouseDownPoint !== null) {
+                    this.activeTranslation = {
+                        x: event.clientX - this.mouseDownPoint.x,
+                        y: event.clientY - this.mouseDownPoint.y
+                    };
+                }
+            },
+            onMouseDown(event) {
+                this.mouseDownPoint = {x: event.clientX, y: event.clientY};
+            },
+            onMouseUp() {
+                if (this.mouseDownPoint !== null) {
+                    this.translation = {
+                        x: this.translation.x + this.activeTranslation.x,
+                        y: this.translation.y + this.activeTranslation.y,
+                    };
+                    this.activeTranslation = {x: 0, y: 0};
+                    this.mouseDownPoint = null;
+                }
+            },
+            onClick(event) {
+                event = event || window.event;
+                if (event.key === " ") {
+                    this.zoom = 1;
+                    this.translation = {x: 0, y: 0};
                 }
             }
         },
@@ -154,6 +208,7 @@
                 window.addEventListener('resize', this.updateCanvasWidth);
                 window.addEventListener('resize', this.updateCanvasHeight);
                 document.getElementById("field-canvas").addEventListener("wheel", this.onScroll);
+                document.addEventListener('keydown', this.onClick);
 
                 //Init
                 this.updateCanvasWidth();
@@ -165,6 +220,7 @@
             window.removeEventListener('resize', this.updateCanvasWidth);
             window.removeEventListener('resize', this.updateCanvasHeight);
             document.getElementById("field-canvas").removeEventListener("wheel", this.onScroll);
+            document.removeEventListener('keydown', this.onClick);
         },
     }
 </script>
