@@ -18,10 +18,10 @@ type Point struct {
 }
 
 type Style struct {
-	Stroke      *string `json:"stroke"`
-	StrokeWidth *int    `json:"strokeWidth"`
-	Fill        *string `json:"fill"`
-	FillOpacity *int    `json:"fillOpacity"`
+	Stroke      *string  `json:"stroke"`
+	StrokeWidth *float32 `json:"strokeWidth"`
+	Fill        *string  `json:"fill"`
+	FillOpacity *float32 `json:"fillOpacity"`
 }
 
 type Line struct {
@@ -43,7 +43,7 @@ type Path struct {
 
 type PathElement struct {
 	Type string    `json:"type"`
-	Args []float32 `json:"args"`
+	Args []float64 `json:"args"`
 }
 
 type Text struct {
