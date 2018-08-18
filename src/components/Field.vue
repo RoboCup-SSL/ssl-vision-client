@@ -1,5 +1,6 @@
 <template>
-    <svg id="field-canvas" ref="canvas"
+    <svg id="field-canvas"
+         ref="canvas"
          :viewBox="viewBox">
 
         <!-- rotate field -->
@@ -78,6 +79,7 @@
             return {
                 canvasWidth: 0,
                 canvasHeight: 0,
+                zoom: 1.0,
             }
         },
         computed: {
@@ -93,10 +95,11 @@
                 return this.canvasHeight / this.canvasWidth;
             },
             getFieldTransformation() {
+                let scale = 'scale(' + this.zoom + ')';
                 if (this.rotateField) {
-                    return 'rotate(90)';
+                    return 'rotate(90) ' + scale;
                 }
-                return '';
+                return scale;
             },
             viewBox() {
                 if (this.rotateField) {
@@ -137,11 +140,20 @@
                 }
                 return '';
             },
+            onScroll(event) {
+                let newZoom = this.zoom - event.deltaY / 500;
+                if (newZoom < 1) {
+                    this.zoom = 1;
+                } else {
+                    this.zoom = newZoom;
+                }
+            }
         },
         mounted() {
             this.$nextTick(function () {
                 window.addEventListener('resize', this.updateCanvasWidth);
                 window.addEventListener('resize', this.updateCanvasHeight);
+                document.getElementById("field-canvas").addEventListener("wheel", this.onScroll);
 
                 //Init
                 this.updateCanvasWidth();
@@ -152,6 +164,7 @@
         beforeDestroy() {
             window.removeEventListener('resize', this.updateCanvasWidth);
             window.removeEventListener('resize', this.updateCanvasHeight);
+            document.getElementById("field-canvas").removeEventListener("wheel", this.onScroll);
         },
     }
 </script>
