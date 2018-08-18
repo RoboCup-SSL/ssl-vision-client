@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <Field :field="field"/>
+        <Field/>
     </div>
 </template>
 

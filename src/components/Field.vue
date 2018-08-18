@@ -1,5 +1,5 @@
 <template>
-    <svg class="field-canvas"
+    <svg id="field-canvas" ref="canvas"
          :viewBox="viewBox">
 
         <!-- rotate field -->
@@ -38,6 +38,7 @@
                   :key="'text-' + i"
                   :x="t.p.x"
                   :y="t.p.y"
+                  :transform="textTransform(t.p)"
                   :style="[defStyle, defFontStyle, t]">
                 {{t.text}}
             </text>
@@ -51,10 +52,6 @@
     export default {
         name: "Field",
         props: {
-            rotateField: {
-                type: Boolean,
-                default: false
-            },
             defStyle: {
                 type: Object,
                 default: function () {
@@ -76,23 +73,46 @@
                     }
                 }
             },
-            field: {
-                type: Object
+        },
+        data() {
+            return {
+                canvasWidth: 0,
+                canvasHeight: 0,
             }
         },
         computed: {
+            rotateField() {
+                return this.fieldRatio < this.viewPortRatio;
+            },
+            fieldRatio() {
+                let wl = this.field.fieldWidth / this.field.fieldLength;
+                let lw = this.field.fieldLength / this.field.fieldWidth;
+                return (wl + lw) / 2;
+            },
+            viewPortRatio() {
+                return this.canvasHeight / this.canvasWidth;
+            },
             getFieldTransformation() {
                 if (this.rotateField) {
-                    return 'rotate(90) scale(' + (this.field.fieldWidth / this.field.fieldLength) + ')';
+                    return 'rotate(90)';
                 }
                 return '';
             },
             viewBox() {
+                if (this.rotateField) {
+                    return (-(this.field.fieldWidth / 2 + this.field.boundaryWidth))
+                        + ' ' + (-(this.field.fieldLength / 2 + this.field.boundaryWidth))
+                        + ' ' + (this.field.fieldWidth + this.field.boundaryWidth * 2)
+                        + ' ' + (this.field.fieldLength + this.field.boundaryWidth * 2);
+                }
                 return (-(this.field.fieldLength / 2 + this.field.boundaryWidth))
                     + ' ' + (-(this.field.fieldWidth / 2 + this.field.boundaryWidth))
                     + ' ' + (this.field.fieldLength + this.field.boundaryWidth * 2)
                     + ' ' + (this.field.fieldWidth + this.field.boundaryWidth * 2);
             },
+            field() {
+                return this.$store.state.field;
+            }
         },
         methods: {
             pathFromD: function (pd) {
@@ -104,13 +124,40 @@
                     }
                 }
                 return d;
-            }
-        }
+            },
+            updateCanvasWidth() {
+                this.canvasWidth = this.$refs.canvas.scrollWidth;
+            },
+            updateCanvasHeight() {
+                this.canvasHeight = this.$refs.canvas.scrollHeight;
+            },
+            textTransform(p) {
+                if (this.rotateField) {
+                    return 'rotate(-90,' + p.x + ',' + p.y + ')'
+                }
+                return '';
+            },
+        },
+        mounted() {
+            this.$nextTick(function () {
+                window.addEventListener('resize', this.updateCanvasWidth);
+                window.addEventListener('resize', this.updateCanvasHeight);
+
+                //Init
+                this.updateCanvasWidth();
+                this.updateCanvasHeight();
+            })
+
+        },
+        beforeDestroy() {
+            window.removeEventListener('resize', this.updateCanvasWidth);
+            window.removeEventListener('resize', this.updateCanvasHeight);
+        },
     }
 </script>
 
 <style scoped>
-    .field-canvas {
+    #field-canvas {
         width: 100%;
         height: 100%;
         display: table-row;
