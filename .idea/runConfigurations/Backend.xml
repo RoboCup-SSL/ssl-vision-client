@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Backend" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="ssl-vision-client" />
+    <working_directory value="$PROJECT_DIR$/" />
+    <go_parameters value="-i" />
+    <kind value="DIRECTORY" />
+    <filePath value="$PROJECT_DIR$/|$PROJECT_DIR$/cmd/ssl-vision-client/main.go" />
+    <package value="github.com/RoboCup-SSL/ssl-vision-client" />
+    <directory value="$PROJECT_DIR$/cmd/ssl-vision-client" />
+    <method v="2" />
+  </configuration>
+</component>
