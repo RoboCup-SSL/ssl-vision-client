@@ -32,7 +32,17 @@ func setupVisionClient(address string) {
 
 func setupUi() {
 	box := packr.NewBox("../../dist")
-	http.Handle("/", http.FileServer(box))
+
+	withResponseHeaders := func(h http.Handler) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			// Set some header.
+			w.Header().Add("Access-Control-Allow-Origin", "*")
+			// Serve with the actual handler.
+			h.ServeHTTP(w, r)
+		}
+	}
+
+	http.Handle("/", withResponseHeaders(http.FileServer(box)))
 	if box.Has("index.html") {
 		log.Printf("UI is available at http://%v", *address)
 	} else {
