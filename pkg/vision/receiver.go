@@ -21,6 +21,18 @@ type Receiver struct {
 func NewReceiver() (r Receiver) {
 	r.detections = map[int]*sslproto.SSL_DetectionFrame{}
 	r.receivedTimes = map[int]time.Time{}
+	r.Geometry = new(sslproto.SSL_GeometryData)
+	r.Geometry.Field = new(sslproto.SSL_GeometryFieldSize)
+	r.Geometry.Field.FieldWidth = new(int32)
+	r.Geometry.Field.FieldLength = new(int32)
+	r.Geometry.Field.GoalDepth = new(int32)
+	r.Geometry.Field.GoalWidth = new(int32)
+	r.Geometry.Field.BoundaryWidth = new(int32)
+	*r.Geometry.Field.FieldWidth = 9000
+	*r.Geometry.Field.FieldLength = 12000
+	*r.Geometry.Field.GoalDepth = 180
+	*r.Geometry.Field.GoalWidth = 1000
+	*r.Geometry.Field.BoundaryWidth = 300
 	return
 }
 
