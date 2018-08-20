@@ -15,15 +15,20 @@ If you just want to use this app, simply download the latest [release binary](ht
 
 ### Requirements
 You need to install following dependencies first: 
- * Go
+ * Go >= 1.9
  * NPM
 
 ### Prepare
+Download and install to [GOPATH](https://github.com/golang/go/wiki/GOPATH):
 ```bash
-# download dependencies for backend
-go get -v -d ./...
-
-# download dependencies for frontend
+go get -u github.com/RoboCup-SSL/ssl-vision-client/...
+```
+Switch to project root directory
+```bash
+cd $GOPATH/src/github.com/RoboCup-SSL/ssl-vision-client/
+```
+Download dependencies for frontend
+```bash
 npm install
 ```
 
@@ -40,7 +45,7 @@ npm run serve
 ```
 Or use the provided IntelliJ run configurations.
 
-### Build self-containing release binary
+### Build self-contained release binary
 First, build the UI resources
 ```bash
 # compile and minify UI
