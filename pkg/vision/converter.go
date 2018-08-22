@@ -1,7 +1,7 @@
 package vision
 
 import (
-	"github.com/RoboCup-SSL/ssl-go-tools/sslproto"
+	"github.com/RoboCup-SSL/ssl-go-tools/pkg/sslproto"
 	"math"
 	"strconv"
 )
