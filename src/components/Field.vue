@@ -155,10 +155,12 @@
                 return d;
             },
             updateCanvasWidth() {
-                this.canvasWidth = this.$refs.canvas.clientWidth;
+                // Firefox does not support clientWidth for SVG, so fall back to the parent element
+                this.canvasWidth = this.$refs.canvas.clientWidth || this.$refs.canvas.parentNode.clientWidth;
             },
             updateCanvasHeight() {
-                this.canvasHeight = this.$refs.canvas.clientHeight;
+                // Firefox does not support clientWidth for SVG, so fall back to the parent element
+                this.canvasHeight = this.$refs.canvas.clientHeight || this.$refs.canvas.parentNode.clientHeight;
             },
             textTransform(p) {
                 if (this.rotateField) {
