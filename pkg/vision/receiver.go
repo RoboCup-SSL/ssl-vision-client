@@ -48,11 +48,13 @@ func (r *Receiver) Receive(multicastAddress string) {
 		n, _, err := listener.ReadFrom(data)
 		if err != nil {
 			log.Println("ReadFromUDP failed:", err)
+			break
 		}
 
 		message, err := parseVisionWrapperPacket(data[:n])
 		if err != nil {
 			log.Print("Could not parse referee message: ", err)
+			break
 		} else {
 			if message.Detection != nil {
 				r.mutex.Lock()
@@ -66,6 +68,11 @@ func (r *Receiver) Receive(multicastAddress string) {
 			}
 		}
 	}
+
+	// wait a second and restart
+	listener.Close()
+	time.Sleep(time.Second)
+	r.Receive(multicastAddress)
 }
 
 func (r *Receiver) CombinedDetectionFrames() (f *sslproto.SSL_DetectionFrame) {
