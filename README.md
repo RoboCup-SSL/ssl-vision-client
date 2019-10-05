@@ -16,7 +16,8 @@ If you just want to use this app, simply download the latest [release binary](ht
 ### Requirements
 You need to install following dependencies first: 
  * Go >= 1.9
- * NPM
+ * Node
+ * Yarn
 
 ### Prepare
 Download and install to [GOPATH](https://github.com/golang/go/wiki/GOPATH):
@@ -29,7 +30,7 @@ cd $GOPATH/src/github.com/RoboCup-SSL/ssl-vision-client/
 ```
 Download dependencies for frontend
 ```bash
-npm install
+yarn install
 ```
 
 ### Run
@@ -41,7 +42,7 @@ go run cmd/ssl-vision-client/main.go
 Run the UI:
 ```bash
 # compile and hot-reload
-npm run serve
+yarn serve
 ```
 Or use the provided IntelliJ run configurations.
 
@@ -49,7 +50,7 @@ Or use the provided IntelliJ run configurations.
 First, build the UI resources
 ```bash
 # compile and minify UI
-npm run build
+yarn build
 ```
 Then build the backend with `packr`
 ```bash

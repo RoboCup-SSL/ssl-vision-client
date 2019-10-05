@@ -7,13 +7,13 @@ jobs:
     - checkout
     - run:
         name: "Install dependencies"
-        command: npm install
+        command: yarn install
     - run:
         name: "Run tests"
-        command: npm test
+        command: yarn test
     - run:
         name: "Build"
-        command: npm run build
+        command: yarn build
     - persist_to_workspace:
         root: .
         paths:
