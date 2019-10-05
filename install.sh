@@ -2,8 +2,8 @@
 
 set -e
 
-npm install
-npm run build
+yarn install
+yarn build
 
 go get -v -d ./...
 cd cmd/ssl-vision-client
