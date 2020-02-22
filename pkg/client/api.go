@@ -1,15 +1,20 @@
 package client
 
 type Package struct {
-	FieldWidth    float32  `json:"fieldWidth"`
-	FieldLength   float32  `json:"fieldLength"`
-	BoundaryWidth float32  `json:"boundaryWidth"`
-	GoalWidth     float32  `json:"goalWidth"`
-	GoalDepth     float32  `json:"goalDepth"`
-	Lines         []Line   `json:"lines"`
-	Circles       []Circle `json:"circles"`
-	Paths         []Path   `json:"paths"`
-	Texts         []Text   `json:"texts"`
+	FieldWidth    float32 `json:"fieldWidth"`
+	FieldLength   float32 `json:"fieldLength"`
+	BoundaryWidth float32 `json:"boundaryWidth"`
+	GoalWidth     float32 `json:"goalWidth"`
+	GoalDepth     float32 `json:"goalDepth"`
+	Shapes        []Shape `json:"shapes"`
+}
+
+type Shape struct {
+	OrderNumber int32   `json:"orderNumber"`
+	Line        *Line   `json:"line,omitempty"`
+	Circle      *Circle `json:"circle,omitempty"`
+	Path        *Path   `json:"path,omitempty"`
+	Text        *Text   `json:"text,omitempty"`
 }
 
 type Point struct {
@@ -29,7 +34,6 @@ type Metadata struct {
 	SourceId         string   `json:"sourceId,omitempty"`
 	Layer            []string `json:"layer,omitempty"`
 	VisibleByDefault bool     `json:"visibleByDefault,omitempty"`
-	Order            int32    `json:"order,omitempty"`
 }
 
 type Line struct {

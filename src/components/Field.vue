@@ -17,36 +17,40 @@
                   ref="background"
                   :style="{fill: 'green', fillOpacity: 1, stroke: 'none'}"></rect>
 
-            <line v-for="(l,i) of field.lines"
-                  :key="'line-' + i"
-                  :x1="l.p1.x"
-                  :y1="l.p1.y"
-                  :x2="l.p2.x"
-                  :y2="l.p2.y"
-                  :style="[defStyle, l]">
-            </line>
+            <template v-for="(s,i) of field.shapes">
 
-            <circle v-for="(a,i) of field.circles"
-                    :key="'circle-' + i"
-                    :cx="a.center.x"
-                    :cy="a.center.y"
-                    :r="a.radius"
-                    :style="[defStyle, a]">
-            </circle>
+                <line v-if="s.line"
+                      :key="'shape-' + i"
+                      :x1="s.line.p1.x"
+                      :y1="s.line.p1.y"
+                      :x2="s.line.p2.x"
+                      :y2="s.line.p2.y"
+                      :style="[defStyle, s.line]">
+                </line>
 
-            <path v-for="(p,i) of field.paths"
-                  :key="'path-' + i"
-                  :d="pathFromD(p.d)"
-                  :style="[defStyle, p]"></path>
+                <circle v-if="s.circle"
+                        :key="'shape-' + i"
+                        :cx="s.circle.center.x"
+                        :cy="s.circle.center.y"
+                        :r="s.circle.radius"
+                        :style="[defStyle, s.circle]">
+                </circle>
 
-            <text v-for="(t,i) of field.texts"
-                  :key="'text-' + i"
-                  :x="t.p.x"
-                  :y="t.p.y"
-                  :transform="textTransform(t.p)"
-                  :style="[defStyle, defFontStyle, t]">
-                {{t.text}}
-            </text>
+                <path v-if="s.path"
+                      :key="'shape-' + i"
+                      :d="pathFromD(s.path.d)"
+                      :style="[defStyle, s.path]"></path>
+
+                <text v-if="s.text"
+                      :key="'shape-' + i"
+                      :x="s.text.p.x"
+                      :y="s.text.p.y"
+                      :transform="textTransform(s.text.p)"
+                      :style="[defStyle, defFontStyle, s.text]">
+                    {{s.text.text}}
+                </text>
+
+            </template>
         </g>
     </svg>
 </template>
