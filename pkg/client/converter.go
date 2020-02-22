@@ -204,6 +204,6 @@ func rgb(rgb *visualization.RgbColor) *string {
 	if rgb == nil {
 		return nil
 	}
-	color := fmt.Sprintf("rgb(%d,%d,%d)", rgb.R, rgb.G, rgb.B)
+	color := fmt.Sprintf("rgba(%d,%d,%d,%.5f)", rgb.R, rgb.G, rgb.B, rgb.A)
 	return &color
 }

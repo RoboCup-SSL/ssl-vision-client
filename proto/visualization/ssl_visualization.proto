@@ -4,6 +4,7 @@ message RgbColor {
     uint32 r = 1;
     uint32 g = 2;
     uint32 b = 3;
+    float a = 4;
 }
 
 message Metadata {
