@@ -168,8 +168,8 @@ func (p *Package) SortShapes() {
 
 func (p *Package) AddLineSegment(sourceId string, lineSegment *visualization.LineSegment) {
 	p.Lines = append(p.Lines, Line{
-		P1: Point{lineSegment.StartX, lineSegment.StartY},
-		P2: Point{lineSegment.EndX, lineSegment.EndY},
+		P1: Point{lineSegment.StartX * 1000, lineSegment.StartY * 1000},
+		P2: Point{lineSegment.EndX * 1000, lineSegment.EndY * 1000},
 		Metadata: Metadata{
 			SourceId:         sourceId,
 			Layer:            lineSegment.Metadata.Layer,
@@ -185,8 +185,8 @@ func (p *Package) AddLineSegment(sourceId string, lineSegment *visualization.Lin
 
 func (p *Package) AddCircle(sourceId string, circle *visualization.Circle) {
 	p.Circles = append(p.Circles, Circle{
-		Center: Point{circle.CenterX, circle.CenterY},
-		Radius: circle.Radius,
+		Center: Point{circle.CenterX * 1000, circle.CenterY * 1000},
+		Radius: circle.Radius * 1000,
 		Metadata: Metadata{
 			SourceId:         sourceId,
 			Layer:            circle.Metadata.Layer,
