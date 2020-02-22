@@ -1,4 +1,4 @@
-package vision
+package client
 
 type Package struct {
 	FieldWidth    float32  `json:"fieldWidth"`
@@ -25,21 +25,31 @@ type Style struct {
 	Font        *string  `json:"font,omitempty"`
 }
 
+type Metadata struct {
+	SourceId         string   `json:"sourceId,omitempty"`
+	Layer            []string `json:"layer,omitempty"`
+	VisibleByDefault bool     `json:"visibleByDefault,omitempty"`
+	Order            int32    `json:"order,omitempty"`
+}
+
 type Line struct {
 	P1 Point `json:"p1"`
 	P2 Point `json:"p2"`
 	Style
+	Metadata
 }
 
 type Circle struct {
 	Center Point   `json:"center"`
 	Radius float32 `json:"radius"`
 	Style
+	Metadata
 }
 
 type Path struct {
 	D []PathElement `json:"d"`
 	Style
+	Metadata
 }
 
 type PathElement struct {
@@ -51,4 +61,5 @@ type Text struct {
 	Text string `json:"text"`
 	P    Point  `json:"p"`
 	Style
+	Metadata
 }

@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+message RgbColor {
+    uint32 r = 1;
+    uint32 g = 2;
+    uint32 b = 3;
+}
+
+message Metadata {
+    repeated string layer = 1;
+    bool visibleByDefault = 2;
+    int32 order = 3;
+    RgbColor color_fill = 4;
+    RgbColor color_stroke = 5;
+}
+
+message LineSegment {
+    Metadata metadata = 1;
+    float start_x = 2;
+    float start_y = 3;
+    float end_x = 4;
+    float end_y = 5;
+}
+
+message Circle {
+    Metadata metadata = 1;
+    float center_x = 2;
+    float center_y = 3;
+    float radius = 4;
+}
+
+message VisualizationFrame {
+    string sender_id = 1;
+    repeated LineSegment lines = 2;
+    repeated Circle circles = 3;
+}

@@ -53,7 +53,7 @@ func (r *Receiver) Receive(multicastAddress string) {
 
 		message, err := parseVisionWrapperPacket(data[:n])
 		if err != nil {
-			log.Print("Could not parse referee message: ", err)
+			log.Print("Could not parse message: ", err)
 			break
 		} else {
 			if message.Detection != nil {
@@ -70,7 +70,9 @@ func (r *Receiver) Receive(multicastAddress string) {
 	}
 
 	// wait a second and restart
-	listener.Close()
+	if err := listener.Close(); err != nil {
+		log.Println("Could not close listener: ", err)
+	}
 	time.Sleep(time.Second)
 	r.Receive(multicastAddress)
 }
@@ -102,7 +104,9 @@ func openMulticastUdpConnection(address string) (listener *net.UDPConn, err erro
 	if err != nil {
 		return
 	}
-	listener.SetReadBuffer(maxDatagramSize)
+	if err := listener.SetReadBuffer(maxDatagramSize); err != nil {
+		log.Println("Could not set read buffer: ", err)
+	}
 	log.Printf("Listening on %s", address)
 	return
 }
@@ -122,8 +126,7 @@ func (r *Receiver) cleanupDetections() {
 	}
 }
 
-func (r *Receiver) ToPackage() *Package {
-	frame := r.CombinedDetectionFrames()
-	geometry := r.Geometry
-	return ProtoToPackage(frame, geometry)
+func (r *Receiver) CurrentGeometry() (geometry *sslproto.SSL_GeometryData) {
+	geometry = r.Geometry
+	return
 }

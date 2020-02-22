@@ -1,8 +1,10 @@
-package vision
+package client
 
 import (
+	"fmt"
 	"github.com/RoboCup-SSL/ssl-go-tools/pkg/sslproto"
-	"math"
+	"github.com/RoboCup-SSL/ssl-vision-client/pkg/visualization"
+	"sort"
 	"strconv"
 )
 
@@ -19,28 +21,32 @@ var noFill = float32(0)
 var botStrokeWidth = float32(10)
 var ballStrokeWidth = float32(0)
 
-func ProtoToPackage(frame *sslproto.SSL_DetectionFrame, geometry *sslproto.SSL_GeometryData) *Package {
+type LineByOrder []Line
 
-	pack := new(Package)
-	if geometry != nil {
-		addGeometryShapes(pack, geometry)
-	}
+func (a LineByOrder) Len() int           { return len(a) }
+func (a LineByOrder) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a LineByOrder) Less(i, j int) bool { return a[i].Metadata.Order < a[j].Metadata.Order }
 
+type CircleByOrder []Circle
+
+func (a CircleByOrder) Len() int           { return len(a) }
+func (a CircleByOrder) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a CircleByOrder) Less(i, j int) bool { return a[i].Metadata.Order < a[j].Metadata.Order }
+
+func (p *Package) AddDetectionFrame(frame *sslproto.SSL_DetectionFrame) {
 	for _, ball := range frame.Balls {
-		pack.Circles = append(pack.Circles, createBallShape(ball))
+		p.Circles = append(p.Circles, createBallShape(ball))
 	}
 
 	for _, bot := range frame.RobotsBlue {
-		pack.Paths = append(pack.Paths, createBotPath(bot, blue))
-		pack.Texts = append(pack.Texts, createBotId(bot, white))
+		p.Paths = append(p.Paths, createBotPath(bot, blue))
+		p.Texts = append(p.Texts, createBotId(bot, white))
 	}
 
 	for _, bot := range frame.RobotsYellow {
-		pack.Paths = append(pack.Paths, createBotPath(bot, yellow))
-		pack.Texts = append(pack.Texts, createBotId(bot, black))
+		p.Paths = append(p.Paths, createBotPath(bot, yellow))
+		p.Texts = append(p.Texts, createBotId(bot, black))
 	}
-
-	return pack
 }
 
 func createBallShape(ball *sslproto.SSL_DetectionBall) Circle {
@@ -54,14 +60,14 @@ func createBallShape(ball *sslproto.SSL_DetectionBall) Circle {
 	}
 }
 
-func addGeometryShapes(pack *Package, geometry *sslproto.SSL_GeometryData) {
-	pack.FieldWidth = float32(*geometry.Field.FieldWidth)
-	pack.FieldLength = float32(*geometry.Field.FieldLength)
-	pack.BoundaryWidth = float32(*geometry.Field.BoundaryWidth)
-	pack.GoalWidth = float32(*geometry.Field.GoalWidth)
-	pack.GoalDepth = float32(*geometry.Field.GoalDepth)
+func (p *Package) AddGeometryShapes(geometry *sslproto.SSL_GeometryData) {
+	p.FieldWidth = float32(*geometry.Field.FieldWidth)
+	p.FieldLength = float32(*geometry.Field.FieldLength)
+	p.BoundaryWidth = float32(*geometry.Field.BoundaryWidth)
+	p.GoalWidth = float32(*geometry.Field.GoalWidth)
+	p.GoalDepth = float32(*geometry.Field.GoalDepth)
 	for _, line := range geometry.Field.FieldLines {
-		pack.Lines = append(pack.Lines, Line{
+		p.Lines = append(p.Lines, Line{
 			P1: Point{*line.P1.X, -*line.P1.Y},
 			P2: Point{*line.P2.X, -*line.P2.Y},
 			Style: Style{
@@ -71,7 +77,7 @@ func addGeometryShapes(pack *Package, geometry *sslproto.SSL_GeometryData) {
 		})
 	}
 	for _, arc := range geometry.Field.FieldArcs {
-		pack.Circles = append(pack.Circles, Circle{
+		p.Circles = append(p.Circles, Circle{
 			Center: Point{*arc.Center.X, -*arc.Center.Y},
 			Radius: *arc.Radius,
 			Style: Style{
@@ -81,8 +87,8 @@ func addGeometryShapes(pack *Package, geometry *sslproto.SSL_GeometryData) {
 			},
 		})
 	}
-	pack.Lines = append(pack.Lines, goalLinesPositive(geometry)...)
-	pack.Lines = append(pack.Lines, goalLinesNegative(geometry)...)
+	p.Lines = append(p.Lines, goalLinesPositive(geometry)...)
+	p.Lines = append(p.Lines, goalLinesNegative(geometry)...)
 }
 
 func goalLinesNegative(geometry *sslproto.SSL_GeometryData) (lines []Line) {
@@ -155,27 +161,49 @@ func createBotId(bot *sslproto.SSL_DetectionRobot, strokeColor string) Text {
 	}
 }
 
-type Bot struct {
-	center2Dribbler float64
-	botRadius       float64
+func (p *Package) SortShapes() {
+	sort.Sort(LineByOrder(p.Lines))
+	sort.Sort(CircleByOrder(p.Circles))
 }
 
-func (b Bot) orient2CornerAngle() float64 {
-	return math.Acos(b.center2Dribbler / b.botRadius)
+func (p *Package) AddLineSegment(sourceId string, lineSegment *visualization.LineSegment) {
+	p.Lines = append(p.Lines, Line{
+		P1: Point{lineSegment.StartX, lineSegment.StartY},
+		P2: Point{lineSegment.EndX, lineSegment.EndY},
+		Metadata: Metadata{
+			SourceId:         sourceId,
+			Layer:            lineSegment.Metadata.Layer,
+			VisibleByDefault: lineSegment.Metadata.VisibleByDefault,
+			Order:            lineSegment.Metadata.Order,
+		},
+		Style: Style{
+			Fill:   rgb(lineSegment.Metadata.ColorFill),
+			Stroke: rgb(lineSegment.Metadata.ColorStroke),
+		},
+	})
 }
 
-func (b Bot) botRightX(orientation float64) float64 {
-	return math.Cos(-orientation+b.orient2CornerAngle()) * b.botRadius
+func (p *Package) AddCircle(sourceId string, circle *visualization.Circle) {
+	p.Circles = append(p.Circles, Circle{
+		Center: Point{circle.CenterX, circle.CenterY},
+		Radius: circle.Radius,
+		Metadata: Metadata{
+			SourceId:         sourceId,
+			Layer:            circle.Metadata.Layer,
+			VisibleByDefault: circle.Metadata.VisibleByDefault,
+			Order:            circle.Metadata.Order,
+		},
+		Style: Style{
+			Fill:   rgb(circle.Metadata.ColorFill),
+			Stroke: rgb(circle.Metadata.ColorStroke),
+		},
+	})
 }
 
-func (b Bot) botRightY(orientation float64) float64 {
-	return math.Sin(-orientation+b.orient2CornerAngle()) * b.botRadius
-}
-
-func (b Bot) botLeftX(orientation float64) float64 {
-	return math.Cos(-orientation-b.orient2CornerAngle()) * b.botRadius
-}
-
-func (b Bot) botLeftY(orientation float64) float64 {
-	return math.Sin(-orientation-b.orient2CornerAngle()) * b.botRadius
+func rgb(rgb *visualization.RgbColor) *string {
+	if rgb == nil {
+		return nil
+	}
+	color := fmt.Sprintf("rgb(%d,%d,%d)", rgb.R, rgb.G, rgb.B)
+	return &color
 }
