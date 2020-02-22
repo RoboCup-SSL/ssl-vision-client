@@ -2,7 +2,7 @@ package client
 
 import (
 	"encoding/json"
-	"github.com/RoboCup-SSL/ssl-go-tools/pkg/sslproto"
+	"github.com/RoboCup-SSL/ssl-vision-client/pkg/vision"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/visualization"
 	"github.com/gorilla/websocket"
 	"log"
@@ -14,8 +14,8 @@ const publishDt = 50 * time.Millisecond
 
 type Publisher struct {
 	upgrader            websocket.Upgrader
-	DetectionProvider   func() *sslproto.SSL_DetectionFrame
-	GeometryProvider    func() *sslproto.SSL_GeometryData
+	DetectionProvider   func() *vision.SSL_DetectionFrame
+	GeometryProvider    func() *vision.SSL_GeometryData
 	LineSegmentProvider func() map[string][]*visualization.LineSegment
 	CircleProvider      func() map[string][]*visualization.Circle
 }

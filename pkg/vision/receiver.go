@@ -1,7 +1,6 @@
 package vision
 
 import (
-	"github.com/RoboCup-SSL/ssl-go-tools/pkg/sslproto"
 	"github.com/golang/protobuf/proto"
 	"log"
 	"net"
@@ -12,17 +11,17 @@ import (
 const maxDatagramSize = 8192
 
 type Receiver struct {
-	detections    map[int]*sslproto.SSL_DetectionFrame
+	detections    map[int]*SSL_DetectionFrame
 	receivedTimes map[int]time.Time
-	Geometry      *sslproto.SSL_GeometryData
+	Geometry      *SSL_GeometryData
 	mutex         sync.Mutex
 }
 
 func NewReceiver() (r Receiver) {
-	r.detections = map[int]*sslproto.SSL_DetectionFrame{}
+	r.detections = map[int]*SSL_DetectionFrame{}
 	r.receivedTimes = map[int]time.Time{}
-	r.Geometry = new(sslproto.SSL_GeometryData)
-	r.Geometry.Field = new(sslproto.SSL_GeometryFieldSize)
+	r.Geometry = new(SSL_GeometryData)
+	r.Geometry.Field = new(SSL_GeometryFieldSize)
 	r.Geometry.Field.FieldWidth = new(int32)
 	r.Geometry.Field.FieldLength = new(int32)
 	r.Geometry.Field.GoalDepth = new(int32)
@@ -77,12 +76,12 @@ func (r *Receiver) Receive(multicastAddress string) {
 	r.Receive(multicastAddress)
 }
 
-func (r *Receiver) CombinedDetectionFrames() (f *sslproto.SSL_DetectionFrame) {
+func (r *Receiver) CombinedDetectionFrames() (f *SSL_DetectionFrame) {
 	r.mutex.Lock()
-	f = new(sslproto.SSL_DetectionFrame)
-	f.Balls = make([]*sslproto.SSL_DetectionBall, 0)
-	f.RobotsYellow = make([]*sslproto.SSL_DetectionRobot, 0)
-	f.RobotsBlue = make([]*sslproto.SSL_DetectionRobot, 0)
+	f = new(SSL_DetectionFrame)
+	f.Balls = make([]*SSL_DetectionBall, 0)
+	f.RobotsYellow = make([]*SSL_DetectionRobot, 0)
+	f.RobotsBlue = make([]*SSL_DetectionRobot, 0)
 
 	r.cleanupDetections()
 	for _, b := range r.detections {
@@ -111,8 +110,8 @@ func openMulticastUdpConnection(address string) (listener *net.UDPConn, err erro
 	return
 }
 
-func parseVisionWrapperPacket(data []byte) (message *sslproto.SSL_WrapperPacket, err error) {
-	message = new(sslproto.SSL_WrapperPacket)
+func parseVisionWrapperPacket(data []byte) (message *SSL_WrapperPacket, err error) {
+	message = new(SSL_WrapperPacket)
 	err = proto.Unmarshal(data, message)
 	return
 }
@@ -126,7 +125,7 @@ func (r *Receiver) cleanupDetections() {
 	}
 }
 
-func (r *Receiver) CurrentGeometry() (geometry *sslproto.SSL_GeometryData) {
+func (r *Receiver) CurrentGeometry() (geometry *SSL_GeometryData) {
 	geometry = r.Geometry
 	return
 }

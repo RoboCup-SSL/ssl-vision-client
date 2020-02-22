@@ -2,7 +2,7 @@ package client
 
 import (
 	"fmt"
-	"github.com/RoboCup-SSL/ssl-go-tools/pkg/sslproto"
+	"github.com/RoboCup-SSL/ssl-vision-client/pkg/vision"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/visualization"
 	"sort"
 	"strconv"
@@ -33,7 +33,7 @@ func (a CircleByOrder) Len() int           { return len(a) }
 func (a CircleByOrder) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a CircleByOrder) Less(i, j int) bool { return a[i].Metadata.Order < a[j].Metadata.Order }
 
-func (p *Package) AddDetectionFrame(frame *sslproto.SSL_DetectionFrame) {
+func (p *Package) AddDetectionFrame(frame *vision.SSL_DetectionFrame) {
 	for _, ball := range frame.Balls {
 		p.Circles = append(p.Circles, createBallShape(ball))
 	}
@@ -49,7 +49,7 @@ func (p *Package) AddDetectionFrame(frame *sslproto.SSL_DetectionFrame) {
 	}
 }
 
-func createBallShape(ball *sslproto.SSL_DetectionBall) Circle {
+func createBallShape(ball *vision.SSL_DetectionBall) Circle {
 	return Circle{
 		Center: Point{*ball.X, -*ball.Y},
 		Radius: ballRadius,
@@ -60,7 +60,7 @@ func createBallShape(ball *sslproto.SSL_DetectionBall) Circle {
 	}
 }
 
-func (p *Package) AddGeometryShapes(geometry *sslproto.SSL_GeometryData) {
+func (p *Package) AddGeometryShapes(geometry *vision.SSL_GeometryData) {
 	p.FieldWidth = float32(*geometry.Field.FieldWidth)
 	p.FieldLength = float32(*geometry.Field.FieldLength)
 	p.BoundaryWidth = float32(*geometry.Field.BoundaryWidth)
@@ -91,7 +91,7 @@ func (p *Package) AddGeometryShapes(geometry *sslproto.SSL_GeometryData) {
 	p.Lines = append(p.Lines, goalLinesNegative(geometry)...)
 }
 
-func goalLinesNegative(geometry *sslproto.SSL_GeometryData) (lines []Line) {
+func goalLinesNegative(geometry *vision.SSL_GeometryData) (lines []Line) {
 	lines = goalLinesPositive(geometry)
 	for i := range lines {
 		lines[i].P1.X *= -1
@@ -100,7 +100,7 @@ func goalLinesNegative(geometry *sslproto.SSL_GeometryData) (lines []Line) {
 	return
 }
 
-func goalLinesPositive(geometry *sslproto.SSL_GeometryData) (lines []Line) {
+func goalLinesPositive(geometry *vision.SSL_GeometryData) (lines []Line) {
 	flh := float32(*geometry.Field.FieldLength / 2)
 	gwh := float32(*geometry.Field.GoalWidth / 2)
 	gd := float32(*geometry.Field.GoalDepth)
@@ -114,7 +114,7 @@ func goalLinesPositive(geometry *sslproto.SSL_GeometryData) (lines []Line) {
 	return
 }
 
-func createBotPath(bot *sslproto.SSL_DetectionRobot, fillColor string) Path {
+func createBotPath(bot *vision.SSL_DetectionRobot, fillColor string) Path {
 	b := Bot{center2Dribbler, botRadius}
 	x := float64(*bot.X)
 	y := -float64(*bot.Y)
@@ -151,7 +151,7 @@ func createBotPath(bot *sslproto.SSL_DetectionRobot, fillColor string) Path {
 	}
 }
 
-func createBotId(bot *sslproto.SSL_DetectionRobot, strokeColor string) Text {
+func createBotId(bot *vision.SSL_DetectionRobot, strokeColor string) Text {
 	return Text{
 		Text: strconv.Itoa(int(*bot.RobotId)),
 		P:    Point{*bot.X, -*bot.Y},
