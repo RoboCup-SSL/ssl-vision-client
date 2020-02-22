@@ -20,10 +20,15 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
+// Color encoded in RGB
 type RgbColor struct {
-	R                    uint32   `protobuf:"varint,1,opt,name=r,proto3" json:"r,omitempty"`
-	G                    uint32   `protobuf:"varint,2,opt,name=g,proto3" json:"g,omitempty"`
-	B                    uint32   `protobuf:"varint,3,opt,name=b,proto3" json:"b,omitempty"`
+	// red (0-255)
+	R uint32 `protobuf:"varint,1,opt,name=r,proto3" json:"r,omitempty"`
+	// green (0-255)
+	G uint32 `protobuf:"varint,2,opt,name=g,proto3" json:"g,omitempty"`
+	// blue (0-255)
+	B uint32 `protobuf:"varint,3,opt,name=b,proto3" json:"b,omitempty"`
+	// alpha (0.0-1.0)
 	A                    float32  `protobuf:"fixed32,4,opt,name=a,proto3" json:"a,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -83,11 +88,23 @@ func (m *RgbColor) GetA() float32 {
 	return 0
 }
 
+// Metadata for each shape
 type Metadata struct {
-	Layer                []string  `protobuf:"bytes,1,rep,name=layer,proto3" json:"layer,omitempty"`
-	VisibleByDefault     bool      `protobuf:"varint,2,opt,name=visibleByDefault,proto3" json:"visibleByDefault,omitempty"`
-	Order                int32     `protobuf:"varint,3,opt,name=order,proto3" json:"order,omitempty"`
-	ColorFill            *RgbColor `protobuf:"bytes,4,opt,name=color_fill,json=colorFill,proto3" json:"color_fill,omitempty"`
+	// layer name, optionally with a hierarchy
+	Layer []string `protobuf:"bytes,1,rep,name=layer,proto3" json:"layer,omitempty"`
+	// Should a client show this by default?
+	VisibleByDefault bool `protobuf:"varint,2,opt,name=visibleByDefault,proto3" json:"visibleByDefault,omitempty"`
+	// An order number:
+	// <0: Below field lines
+	// 0: default
+	// 1: robots
+	// 2: robot ids
+	// 3: ball
+	// >3: above vision objects
+	Order int32 `protobuf:"varint,3,opt,name=order,proto3" json:"order,omitempty"`
+	// Color to fill the shape
+	ColorFill *RgbColor `protobuf:"bytes,4,opt,name=color_fill,json=colorFill,proto3" json:"color_fill,omitempty"`
+	// Color for the shape stroke
 	ColorStroke          *RgbColor `protobuf:"bytes,5,opt,name=color_stroke,json=colorStroke,proto3" json:"color_stroke,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
 	XXX_unrecognized     []byte    `json:"-"`
@@ -154,15 +171,21 @@ func (m *Metadata) GetColorStroke() *RgbColor {
 	return nil
 }
 
+// A line segment
 type LineSegment struct {
-	Metadata             *Metadata `protobuf:"bytes,1,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	StartX               float32   `protobuf:"fixed32,2,opt,name=start_x,json=startX,proto3" json:"start_x,omitempty"`
-	StartY               float32   `protobuf:"fixed32,3,opt,name=start_y,json=startY,proto3" json:"start_y,omitempty"`
-	EndX                 float32   `protobuf:"fixed32,4,opt,name=end_x,json=endX,proto3" json:"end_x,omitempty"`
-	EndY                 float32   `protobuf:"fixed32,5,opt,name=end_y,json=endY,proto3" json:"end_y,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
-	XXX_unrecognized     []byte    `json:"-"`
-	XXX_sizecache        int32     `json:"-"`
+	// The metadata
+	Metadata *Metadata `protobuf:"bytes,1,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	// Start point, x value [m]
+	StartX float32 `protobuf:"fixed32,2,opt,name=start_x,json=startX,proto3" json:"start_x,omitempty"`
+	// Start point, y value [m]
+	StartY float32 `protobuf:"fixed32,3,opt,name=start_y,json=startY,proto3" json:"start_y,omitempty"`
+	// End point, x value [m]
+	EndX float32 `protobuf:"fixed32,4,opt,name=end_x,json=endX,proto3" json:"end_x,omitempty"`
+	// End point, y value [m]
+	EndY                 float32  `protobuf:"fixed32,5,opt,name=end_y,json=endY,proto3" json:"end_y,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *LineSegment) Reset()         { *m = LineSegment{} }
@@ -225,14 +248,19 @@ func (m *LineSegment) GetEndY() float32 {
 	return 0
 }
 
+// A full circle
 type Circle struct {
-	Metadata             *Metadata `protobuf:"bytes,1,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	CenterX              float32   `protobuf:"fixed32,2,opt,name=center_x,json=centerX,proto3" json:"center_x,omitempty"`
-	CenterY              float32   `protobuf:"fixed32,3,opt,name=center_y,json=centerY,proto3" json:"center_y,omitempty"`
-	Radius               float32   `protobuf:"fixed32,4,opt,name=radius,proto3" json:"radius,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
-	XXX_unrecognized     []byte    `json:"-"`
-	XXX_sizecache        int32     `json:"-"`
+	// The metadata
+	Metadata *Metadata `protobuf:"bytes,1,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	// Center point, x value [m]
+	CenterX float32 `protobuf:"fixed32,2,opt,name=center_x,json=centerX,proto3" json:"center_x,omitempty"`
+	// Center point, y value [m]
+	CenterY float32 `protobuf:"fixed32,3,opt,name=center_y,json=centerY,proto3" json:"center_y,omitempty"`
+	// Radius [m]
+	Radius               float32  `protobuf:"fixed32,4,opt,name=radius,proto3" json:"radius,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *Circle) Reset()         { *m = Circle{} }
@@ -288,13 +316,19 @@ func (m *Circle) GetRadius() float32 {
 	return 0
 }
 
+// Wrapper frame containing all shapes
 type VisualizationFrame struct {
-	SenderId             string         `protobuf:"bytes,1,opt,name=sender_id,json=senderId,proto3" json:"sender_id,omitempty"`
-	Lines                []*LineSegment `protobuf:"bytes,2,rep,name=lines,proto3" json:"lines,omitempty"`
-	Circles              []*Circle      `protobuf:"bytes,3,rep,name=circles,proto3" json:"circles,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
-	XXX_unrecognized     []byte         `json:"-"`
-	XXX_sizecache        int32          `json:"-"`
+	// An identifier for the sender
+	// Used to identify the source of shapes in a client
+	// Also used to keep track of the latest frame of each sender in clients, if there a multiple ones senders
+	SenderId string `protobuf:"bytes,1,opt,name=sender_id,json=senderId,proto3" json:"sender_id,omitempty"`
+	// all lines
+	Lines []*LineSegment `protobuf:"bytes,2,rep,name=lines,proto3" json:"lines,omitempty"`
+	// all circles
+	Circles              []*Circle `protobuf:"bytes,3,rep,name=circles,proto3" json:"circles,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
 }
 
 func (m *VisualizationFrame) Reset()         { *m = VisualizationFrame{} }
