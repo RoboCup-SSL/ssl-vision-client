@@ -43,6 +43,7 @@ func (r *Receiver) Receive(multicastAddress string) {
 			break
 		} else {
 			r.mutex.Lock()
+			r.cleanupDetections()
 			r.frames[frame.SenderId] = frame
 			r.receivedTimes[frame.SenderId] = time.Now()
 			r.mutex.Unlock()
@@ -90,16 +91,20 @@ func (r *Receiver) cleanupDetections() {
 
 func (r *Receiver) GetLineSegments() map[string][]*LineSegment {
 	lines := map[string][]*LineSegment{}
+	r.mutex.Lock()
 	for _, frame := range r.frames {
 		lines[frame.SenderId] = frame.Lines
 	}
+	r.mutex.Unlock()
 	return lines
 }
 
 func (r *Receiver) GetCircles() map[string][]*Circle {
 	lines := map[string][]*Circle{}
+	r.mutex.Lock()
 	for _, frame := range r.frames {
 		lines[frame.SenderId] = frame.Circles
 	}
+	r.mutex.Unlock()
 	return lines
 }
