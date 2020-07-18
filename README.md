@@ -9,14 +9,23 @@ A graphical client for [ssl-vision](https://github.com/RoboCup-SSL/ssl-vision) t
 shows them in a web-ui.
 
 ## Usage
-If you just want to use this app, simply download the latest [release binary](https://github.com/RoboCup-SSL/ssl-vision-client/releases/latest). The binary is self-contained. No dependencies are required.
+If you just want to use this app, simply download the latest [release binary](https://github.com/RoboCup-SSL/ssl-vision-client/releases/latest).
+The binary is self-contained. No dependencies are required.
+
+You can also use pre-build docker images:
+```shell script
+docker pull robocupssl/ssl-vision-client
+docker run -p 8082:8082 robocupssl/ssl-vision-client
+```
+
+By default, the UI is available at http://localhost:8082
 
 ## Development
 
 ### Requirements
 You need to install following dependencies first: 
- * Go >= 1.9
- * Node
+ * Go >= 1.14
+ * Node >= 10
  * Yarn
 
 ### Prepare
