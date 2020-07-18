@@ -11,7 +11,13 @@ if (process.env.NODE_ENV === 'development') {
     wsAddress = 'ws://localhost:8082/api/vision';
 } else {
     // UI and backend are served on the same host+port on production builds
-    wsAddress = 'ws://' + window.location.hostname + ':' + window.location.port + '/api/vision';
+    let protocol;
+    if (window.location.protocol === 'http:') {
+        protocol = 'ws:'
+    } else {
+        protocol = 'wss:'
+    }
+    wsAddress = protocol + '//' + window.location.hostname + ':' + window.location.port + '/api/vision';
 }
 
 Vue.use(VueNativeSock, wsAddress, {
