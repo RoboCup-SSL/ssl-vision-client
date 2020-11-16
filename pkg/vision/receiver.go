@@ -35,6 +35,16 @@ func NewReceiver() (r Receiver) {
 	return
 }
 
+func (r *Receiver) Detections() (result map[int]SSL_DetectionFrame) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	result = map[int]SSL_DetectionFrame{}
+	for id, frame := range r.detections {
+		result[id] = *frame
+	}
+	return
+}
+
 func (r *Receiver) Receive(multicastAddress string) {
 	listener, err := openMulticastUdpConnection(multicastAddress)
 	if err != nil {
