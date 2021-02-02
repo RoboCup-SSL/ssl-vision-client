@@ -1,20 +1,19 @@
 package vision
 
 import (
+	"github.com/RoboCup-SSL/ssl-vision-client/pkg/sslnet"
 	"github.com/golang/protobuf/proto"
 	"log"
-	"net"
 	"sync"
 	"time"
 )
 
-const maxDatagramSize = 8192
-
 type Receiver struct {
-	detections    map[int]*SSL_DetectionFrame
-	receivedTimes map[int]time.Time
-	Geometry      *SSL_GeometryData
-	mutex         sync.Mutex
+	detections        map[int]*SSL_DetectionFrame
+	receivedTimes     map[int]time.Time
+	Geometry          *SSL_GeometryData
+	mutex             sync.Mutex
+	multicastReceiver *sslnet.MulticastReceiver
 }
 
 func NewReceiver() (r Receiver) {
@@ -32,7 +31,12 @@ func NewReceiver() (r Receiver) {
 	*r.Geometry.Field.GoalDepth = 180
 	*r.Geometry.Field.GoalWidth = 1000
 	*r.Geometry.Field.BoundaryWidth = 300
+	r.multicastReceiver = sslnet.NewMulticastReceiver(r.consumeMessage)
 	return
+}
+
+func (r *Receiver) Start(multicastAddress string) {
+	r.multicastReceiver.Start(multicastAddress)
 }
 
 func (r *Receiver) Detections() (result map[int]SSL_DetectionFrame) {
@@ -45,45 +49,22 @@ func (r *Receiver) Detections() (result map[int]SSL_DetectionFrame) {
 	return
 }
 
-func (r *Receiver) Receive(multicastAddress string) {
-	listener, err := openMulticastUdpConnection(multicastAddress)
+func (r *Receiver) consumeMessage(data []byte) {
+	message, err := parseVisionWrapperPacket(data)
 	if err != nil {
-		log.Printf("Could not connect to %v: %v", multicastAddress, err)
+		log.Print("Could not parse message: ", err)
 		return
 	}
-
-	data := make([]byte, maxDatagramSize)
-	for {
-		n, _, err := listener.ReadFrom(data)
-		if err != nil {
-			log.Println("ReadFromUDP failed:", err)
-			break
-		}
-
-		message, err := parseVisionWrapperPacket(data[:n])
-		if err != nil {
-			log.Print("Could not parse message: ", err)
-			break
-		} else {
-			if message.Detection != nil {
-				r.mutex.Lock()
-				camId := int(*message.Detection.CameraId)
-				r.detections[camId] = message.Detection
-				r.receivedTimes[camId] = time.Now()
-				r.mutex.Unlock()
-			}
-			if message.Geometry != nil {
-				r.Geometry = message.Geometry
-			}
-		}
+	if message.Detection != nil {
+		r.mutex.Lock()
+		camId := int(*message.Detection.CameraId)
+		r.detections[camId] = message.Detection
+		r.receivedTimes[camId] = time.Now()
+		r.mutex.Unlock()
 	}
-
-	// wait a second and restart
-	if err := listener.Close(); err != nil {
-		log.Println("Could not close listener: ", err)
+	if message.Geometry != nil {
+		r.Geometry = message.Geometry
 	}
-	time.Sleep(time.Second)
-	r.Receive(multicastAddress)
 }
 
 func (r *Receiver) CombinedDetectionFrames() (f *SSL_DetectionFrame) {
@@ -101,22 +82,6 @@ func (r *Receiver) CombinedDetectionFrames() (f *SSL_DetectionFrame) {
 	}
 
 	r.mutex.Unlock()
-	return
-}
-
-func openMulticastUdpConnection(address string) (listener *net.UDPConn, err error) {
-	addr, err := net.ResolveUDPAddr("udp", address)
-	if err != nil {
-		return
-	}
-	listener, err = net.ListenMulticastUDP("udp", nil, addr)
-	if err != nil {
-		return
-	}
-	if err := listener.SetReadBuffer(maxDatagramSize); err != nil {
-		log.Println("Could not set read buffer: ", err)
-	}
-	log.Printf("Listening on %s", address)
 	return
 }
 

@@ -34,8 +34,8 @@ func setupVisionClient() {
 	publisher.LineSegmentProvider = visualizationReceiver.GetLineSegments
 	publisher.CircleProvider = visualizationReceiver.GetCircles
 	http.HandleFunc("/api/vision", publisher.Handler)
-	go receiver.Receive(*visionAddress)
-	go visualizationReceiver.Receive(*visualizationAddress)
+	receiver.Start(*visionAddress)
+	visualizationReceiver.Start(*visualizationAddress)
 }
 
 func setupUi() {

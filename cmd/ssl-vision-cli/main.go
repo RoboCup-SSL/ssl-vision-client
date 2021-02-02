@@ -17,7 +17,7 @@ func main() {
 	flag.Parse()
 
 	receiver := vision.NewReceiver()
-	go receiver.Receive(*visionAddress)
+	receiver.Start(*visionAddress)
 
 	for {
 		if *fullScreen {
