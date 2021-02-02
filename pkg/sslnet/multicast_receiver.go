@@ -3,6 +3,7 @@ package sslnet
 import (
 	"log"
 	"net"
+	"sync"
 	"time"
 )
 
@@ -11,6 +12,7 @@ const maxDatagramSize = 8192
 type MulticastReceiver struct {
 	activeIfis     map[string]bool
 	consumer       func([]byte)
+	mutex          sync.Mutex
 	SkipInterfaces []string
 }
 
@@ -33,10 +35,12 @@ func (r *MulticastReceiver) Receive(multicastAddress string) {
 				r.skipInterface(ifi.Name) {
 				continue
 			}
+			r.mutex.Lock()
 			if _, ok := r.activeIfis[ifi.Name]; !ok {
 				// interface not active, (re-)start receiving
 				go r.receiveOnInterface(multicastAddress, ifi)
 			}
+			r.mutex.Unlock()
 		}
 		time.Sleep(1 * time.Second)
 	}
@@ -67,8 +71,10 @@ func (r *MulticastReceiver) receiveOnInterface(multicastAddress string, ifi net.
 		log.Println("Could not set read buffer: ", err)
 	}
 
+	r.mutex.Lock()
 	r.activeIfis[ifi.Name] = true
 	defer delete(r.activeIfis, ifi.Name)
+	r.mutex.Unlock()
 
 	log.Printf("Listening on %s (%s)", multicastAddress, ifi.Name)
 

@@ -16,7 +16,8 @@ type Receiver struct {
 	MulticastReceiver *sslnet.MulticastReceiver
 }
 
-func NewReceiver() (r Receiver) {
+func NewReceiver() (r *Receiver) {
+	r = new(Receiver)
 	r.detections = map[int]*SSL_DetectionFrame{}
 	r.receivedTimes = map[int]time.Time{}
 	r.Geometry = new(SSL_GeometryData)
@@ -55,16 +56,16 @@ func (r *Receiver) consumeMessage(data []byte) {
 		log.Print("Could not parse message: ", err)
 		return
 	}
+	r.mutex.Lock()
 	if message.Detection != nil {
-		r.mutex.Lock()
 		camId := int(*message.Detection.CameraId)
 		r.detections[camId] = message.Detection
 		r.receivedTimes[camId] = time.Now()
-		r.mutex.Unlock()
 	}
 	if message.Geometry != nil {
 		r.Geometry = message.Geometry
 	}
+	r.mutex.Unlock()
 }
 
 func (r *Receiver) CombinedDetectionFrames() (f *SSL_DetectionFrame) {
@@ -101,6 +102,8 @@ func (r *Receiver) cleanupDetections() {
 }
 
 func (r *Receiver) CurrentGeometry() (geometry *SSL_GeometryData) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
 	geometry = r.Geometry
 	return
 }

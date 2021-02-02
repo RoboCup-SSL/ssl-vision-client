@@ -18,4 +18,4 @@ FROM alpine:3.9
 COPY --from=build_go /go/src/github.com/RoboCup-SSL/ssl-vision-client/release/ssl-vision-client_linux_amd64 /app/ssl-vision-client
 EXPOSE 8082
 ENTRYPOINT ["/app/ssl-vision-client"]
-CMD ["/app/ssl-vision-client"]
+CMD []

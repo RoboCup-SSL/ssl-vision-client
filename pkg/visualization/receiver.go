@@ -15,7 +15,8 @@ type Receiver struct {
 	MulticastReceiver *sslnet.MulticastReceiver
 }
 
-func NewReceiver() (r Receiver) {
+func NewReceiver() (r *Receiver) {
+	r = new(Receiver)
 	r.frames = map[string]*VisualizationFrame{}
 	r.receivedTimes = map[string]time.Time{}
 	r.MulticastReceiver = sslnet.NewMulticastReceiver(r.consumeMessage)
