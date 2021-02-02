@@ -8,11 +8,13 @@ import (
 	"github.com/gobuffalo/packr"
 	"log"
 	"net/http"
+	"strings"
 )
 
 var address = flag.String("address", ":8082", "The address on which the UI and API is served, default: :8082")
 var visionAddress = flag.String("visionAddress", "224.5.23.2:10006", "The multicast address of ssl-vision, default: 224.5.23.2:10006")
 var visualizationAddress = flag.String("visualizationAddress", "224.5.23.2:10011", "The multicast address of visualization frames, default: 224.5.23.2:10011")
+var skipInterfaces = flag.String("skipInterfaces", "", "Comma separated list of interface names to ignore when receiving multicast packets")
 
 func main() {
 	flag.Parse()
@@ -34,8 +36,17 @@ func setupVisionClient() {
 	publisher.LineSegmentProvider = visualizationReceiver.GetLineSegments
 	publisher.CircleProvider = visualizationReceiver.GetCircles
 	http.HandleFunc("/api/vision", publisher.Handler)
+
+	skipIfis := parseSkipInterfaces()
+	receiver.MulticastReceiver.SkipInterfaces = skipIfis
+	visualizationReceiver.MulticastReceiver.SkipInterfaces = skipIfis
+
 	receiver.Start(*visionAddress)
 	visualizationReceiver.Start(*visualizationAddress)
+}
+
+func parseSkipInterfaces() []string {
+	return strings.Split(*skipInterfaces, ",")
 }
 
 func setupUi() {

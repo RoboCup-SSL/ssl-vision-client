@@ -9,8 +9,9 @@ import (
 const maxDatagramSize = 8192
 
 type MulticastReceiver struct {
-	activeIfis map[string]bool
-	consumer   func([]byte)
+	activeIfis     map[string]bool
+	consumer       func([]byte)
+	SkipInterfaces []string
 }
 
 func NewMulticastReceiver(consumer func([]byte)) (r *MulticastReceiver) {
@@ -28,8 +29,8 @@ func (r *MulticastReceiver) Receive(multicastAddress string) {
 	for {
 		ifis, _ := net.Interfaces()
 		for _, ifi := range ifis {
-			if ifi.Flags&net.FlagMulticast == 0 {
-				// No multicast support
+			if ifi.Flags&net.FlagMulticast == 0 || // No multicast support
+				r.skipInterface(ifi.Name) {
 				continue
 			}
 			if _, ok := r.activeIfis[ifi.Name]; !ok {
@@ -39,6 +40,15 @@ func (r *MulticastReceiver) Receive(multicastAddress string) {
 		}
 		time.Sleep(1 * time.Second)
 	}
+}
+
+func (r *MulticastReceiver) skipInterface(ifiName string) bool {
+	for _, skipIfi := range r.SkipInterfaces {
+		if skipIfi == ifiName {
+			return true
+		}
+	}
+	return false
 }
 
 func (r *MulticastReceiver) receiveOnInterface(multicastAddress string, ifi net.Interface) {

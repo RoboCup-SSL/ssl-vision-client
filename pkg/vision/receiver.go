@@ -13,7 +13,7 @@ type Receiver struct {
 	receivedTimes     map[int]time.Time
 	Geometry          *SSL_GeometryData
 	mutex             sync.Mutex
-	multicastReceiver *sslnet.MulticastReceiver
+	MulticastReceiver *sslnet.MulticastReceiver
 }
 
 func NewReceiver() (r Receiver) {
@@ -31,12 +31,12 @@ func NewReceiver() (r Receiver) {
 	*r.Geometry.Field.GoalDepth = 180
 	*r.Geometry.Field.GoalWidth = 1000
 	*r.Geometry.Field.BoundaryWidth = 300
-	r.multicastReceiver = sslnet.NewMulticastReceiver(r.consumeMessage)
+	r.MulticastReceiver = sslnet.NewMulticastReceiver(r.consumeMessage)
 	return
 }
 
 func (r *Receiver) Start(multicastAddress string) {
-	r.multicastReceiver.Start(multicastAddress)
+	r.MulticastReceiver.Start(multicastAddress)
 }
 
 func (r *Receiver) Detections() (result map[int]SSL_DetectionFrame) {
