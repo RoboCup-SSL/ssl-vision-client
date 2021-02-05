@@ -13,31 +13,23 @@ type Receiver struct {
 	receivedTimes     map[int]time.Time
 	Geometry          *SSL_GeometryData
 	mutex             sync.Mutex
-	MulticastReceiver *sslnet.MulticastReceiver
+	MulticastServer   *sslnet.MulticastServer
+	ConsumeDetections func(frame *SSL_DetectionFrame)
+	ConsumeGeometry   func(frame *SSL_GeometryData)
 }
 
 func NewReceiver() (r *Receiver) {
 	r = new(Receiver)
 	r.detections = map[int]*SSL_DetectionFrame{}
 	r.receivedTimes = map[int]time.Time{}
-	r.Geometry = new(SSL_GeometryData)
-	r.Geometry.Field = new(SSL_GeometryFieldSize)
-	r.Geometry.Field.FieldWidth = new(int32)
-	r.Geometry.Field.FieldLength = new(int32)
-	r.Geometry.Field.GoalDepth = new(int32)
-	r.Geometry.Field.GoalWidth = new(int32)
-	r.Geometry.Field.BoundaryWidth = new(int32)
-	*r.Geometry.Field.FieldWidth = 9000
-	*r.Geometry.Field.FieldLength = 12000
-	*r.Geometry.Field.GoalDepth = 180
-	*r.Geometry.Field.GoalWidth = 1000
-	*r.Geometry.Field.BoundaryWidth = 300
-	r.MulticastReceiver = sslnet.NewMulticastReceiver(r.consumeMessage)
+	r.MulticastServer = sslnet.NewMulticastServer(r.consumeMessage)
+	r.ConsumeDetections = func(*SSL_DetectionFrame) {}
+	r.ConsumeGeometry = func(*SSL_GeometryData) {}
 	return
 }
 
 func (r *Receiver) Start(multicastAddress string) {
-	r.MulticastReceiver.Start(multicastAddress)
+	r.MulticastServer.Start(multicastAddress)
 }
 
 func (r *Receiver) Detections() (result map[int]SSL_DetectionFrame) {
@@ -61,9 +53,11 @@ func (r *Receiver) consumeMessage(data []byte) {
 		camId := int(*message.Detection.CameraId)
 		r.detections[camId] = message.Detection
 		r.receivedTimes[camId] = time.Now()
+		r.ConsumeDetections(message.Detection)
 	}
 	if message.Geometry != nil {
 		r.Geometry = message.Geometry
+		r.ConsumeGeometry(message.Geometry)
 	}
 	r.mutex.Unlock()
 }
@@ -104,6 +98,9 @@ func (r *Receiver) cleanupDetections() {
 func (r *Receiver) CurrentGeometry() (geometry *SSL_GeometryData) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
-	geometry = r.Geometry
+	if r.Geometry != nil {
+		geometry = new(SSL_GeometryData)
+		*geometry = *r.Geometry
+	}
 	return
 }

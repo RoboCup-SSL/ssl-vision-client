@@ -9,22 +9,22 @@ import (
 )
 
 type Receiver struct {
-	frames            map[string]*VisualizationFrame
-	receivedTimes     map[string]time.Time
-	mutex             sync.Mutex
-	MulticastReceiver *sslnet.MulticastReceiver
+	frames          map[string]*VisualizationFrame
+	receivedTimes   map[string]time.Time
+	mutex           sync.Mutex
+	MulticastServer *sslnet.MulticastServer
 }
 
 func NewReceiver() (r *Receiver) {
 	r = new(Receiver)
 	r.frames = map[string]*VisualizationFrame{}
 	r.receivedTimes = map[string]time.Time{}
-	r.MulticastReceiver = sslnet.NewMulticastReceiver(r.consumeMessage)
+	r.MulticastServer = sslnet.NewMulticastServer(r.consumeMessage)
 	return
 }
 
 func (r *Receiver) Start(multicastAddress string) {
-	r.MulticastReceiver.Start(multicastAddress)
+	r.MulticastServer.Start(multicastAddress)
 }
 
 func (r *Receiver) consumeMessage(data []byte) {

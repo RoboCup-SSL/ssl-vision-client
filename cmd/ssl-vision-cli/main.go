@@ -7,11 +7,17 @@ import (
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/vision"
 	"github.com/golang/protobuf/proto"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
 var visionAddress = flag.String("visionAddress", "224.5.23.2:10006", "The multicast address of ssl-vision, default: 224.5.23.2:10006")
 var fullScreen = flag.Bool("fullScreen", false, "Print the formatted message to the console, clearing the screen during print")
+var continuous = flag.Bool("continuous", false, "Print all received data in a continuous stream")
+var noDetections = flag.Bool("noDetections", false, "Print the detection messages")
+var noGeometry = flag.Bool("noGeometry", false, "Print the geometry messages")
 
 func main() {
 	flag.Parse()
@@ -19,18 +25,19 @@ func main() {
 	receiver := vision.NewReceiver()
 	receiver.Start(*visionAddress)
 
-	for {
-		if *fullScreen {
-			// clear screen, move cursor to upper left corner
-			fmt.Print("\033[H\033[2J")
+	if *continuous {
+		printContinuous(receiver)
+	} else if *fullScreen {
+		printFullscreen(receiver)
+	} else {
+		printAll(receiver)
+	}
+}
 
-			for camId, frame := range receiver.Detections() {
-				fmt.Println("Camera ", camId)
-				fmt.Println(proto.MarshalTextString(&frame))
-				fmt.Println()
-				fmt.Println()
-			}
-		} else {
+func printAll(receiver *vision.Receiver) {
+	for {
+		geometry := receiver.Geometry
+		if !*noDetections {
 			for _, frame := range receiver.Detections() {
 				b, err := json.Marshal(frame)
 				if err != nil {
@@ -39,7 +46,58 @@ func main() {
 				log.Print(string(b))
 			}
 		}
-
+		if !*noGeometry && geometry != nil {
+			b, err := json.Marshal(geometry)
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Print(string(b))
+		}
 		time.Sleep(250 * time.Millisecond)
 	}
+}
+
+func printFullscreen(receiver *vision.Receiver) {
+	for {
+		geometry := receiver.Geometry
+		// clear screen, move cursor to upper left corner
+		fmt.Print("\033[H\033[2J")
+
+		if !*noDetections {
+			for camId, frame := range receiver.Detections() {
+				fmt.Println("Camera ", camId)
+				fmt.Println(proto.MarshalTextString(&frame))
+				fmt.Println()
+				fmt.Println()
+			}
+		}
+		if !*noGeometry && geometry != nil {
+			fmt.Println(proto.MarshalTextString(geometry))
+		}
+		time.Sleep(250 * time.Millisecond)
+	}
+}
+
+func printContinuous(receiver *vision.Receiver) {
+	if !*noDetections {
+		receiver.ConsumeDetections = func(frame *vision.SSL_DetectionFrame) {
+			b, err := json.Marshal(frame)
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Print(string(b))
+		}
+	}
+	if !*noGeometry {
+		receiver.ConsumeGeometry = func(frame *vision.SSL_GeometryData) {
+			b, err := json.Marshal(frame)
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Print(string(b))
+		}
+	}
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
+	<-signals
 }

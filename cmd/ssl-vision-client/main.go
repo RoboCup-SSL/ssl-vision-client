@@ -15,6 +15,7 @@ var address = flag.String("address", ":8082", "The address on which the UI and A
 var visionAddress = flag.String("visionAddress", "224.5.23.2:10006", "The multicast address of ssl-vision, default: 224.5.23.2:10006")
 var visualizationAddress = flag.String("visualizationAddress", "224.5.23.2:10011", "The multicast address of visualization frames, default: 224.5.23.2:10011")
 var skipInterfaces = flag.String("skipInterfaces", "", "Comma separated list of interface names to ignore when receiving multicast packets")
+var verbose = flag.Bool("verbose", false, "Verbose output")
 
 func main() {
 	flag.Parse()
@@ -32,17 +33,45 @@ func setupVisionClient() {
 	visualizationReceiver := visualization.NewReceiver()
 	publisher := client.NewPublisher()
 	publisher.DetectionProvider = receiver.CombinedDetectionFrames
-	publisher.GeometryProvider = receiver.CurrentGeometry
+	publisher.GeometryProvider = geometryProvider(receiver)
 	publisher.LineSegmentProvider = visualizationReceiver.GetLineSegments
 	publisher.CircleProvider = visualizationReceiver.GetCircles
 	http.HandleFunc("/api/vision", publisher.Handler)
 
 	skipIfis := parseSkipInterfaces()
-	receiver.MulticastReceiver.SkipInterfaces = skipIfis
-	visualizationReceiver.MulticastReceiver.SkipInterfaces = skipIfis
+	receiver.MulticastServer.SkipInterfaces = skipIfis
+	receiver.MulticastServer.Verbose = *verbose
+	visualizationReceiver.MulticastServer.SkipInterfaces = skipIfis
+	visualizationReceiver.MulticastServer.Verbose = *verbose
 
 	receiver.Start(*visionAddress)
 	visualizationReceiver.Start(*visualizationAddress)
+}
+
+func geometryProvider(receiver *vision.Receiver) func() *vision.SSL_GeometryData {
+	return func() *vision.SSL_GeometryData {
+		geometry := receiver.CurrentGeometry()
+		if geometry == nil {
+			return defaultGeometry()
+		}
+		return geometry
+	}
+}
+
+func defaultGeometry() (g *vision.SSL_GeometryData) {
+	g = new(vision.SSL_GeometryData)
+	g.Field = new(vision.SSL_GeometryFieldSize)
+	g.Field.FieldWidth = new(int32)
+	g.Field.FieldLength = new(int32)
+	g.Field.GoalDepth = new(int32)
+	g.Field.GoalWidth = new(int32)
+	g.Field.BoundaryWidth = new(int32)
+	*g.Field.FieldWidth = 9000
+	*g.Field.FieldLength = 12000
+	*g.Field.GoalDepth = 180
+	*g.Field.GoalWidth = 1000
+	*g.Field.BoundaryWidth = 300
+	return
 }
 
 func parseSkipInterfaces() []string {
