@@ -7,12 +7,9 @@ set -e
 go get -u github.com/golang/protobuf/protoc-gen-go
 
 for pkgDir in ./proto/*; do
-  # Set package name to current directory
-  packageName=${pkgDir##*/}
-
-  # compile profobuf files in current directory
+  # compile protobuf files in current directory
   protoc -I"$pkgDir" \
     -I"${GOPATH}/src" \
-    --go_out=import_path="${packageName}:pkg/$packageName" \
+    --go_out="$GOPATH/src" \
     "${pkgDir}"/*.proto
 done
