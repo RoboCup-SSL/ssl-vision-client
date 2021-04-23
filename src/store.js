@@ -8,6 +8,8 @@ let fieldLength = 12000;
 let centerCircleRadius = 500;
 
 let defaultField = {
+    activeSourceId: '',
+    sources: {},
     fieldWidth: fieldWidth,
     fieldLength: fieldLength,
     boundaryWidth: 300,

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/client"
+	"github.com/RoboCup-SSL/ssl-vision-client/pkg/tracked"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/vision"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/visualization"
 	"github.com/gobuffalo/packr"
@@ -13,6 +14,7 @@ import (
 
 var address = flag.String("address", ":8082", "The address on which the UI and API is served, default: :8082")
 var visionAddress = flag.String("visionAddress", "224.5.23.2:10006", "The multicast address of ssl-vision, default: 224.5.23.2:10006")
+var trackedAddress = flag.String("trackedAddress", "224.5.23.2:10010", "The multicast address of trackers, default: 224.5.23.2:10010")
 var visualizationAddress = flag.String("visualizationAddress", "224.5.23.2:10011", "The multicast address of visualization frames, default: 224.5.23.2:10011")
 var skipInterfaces = flag.String("skipInterfaces", "", "Comma separated list of interface names to ignore when receiving multicast packets")
 var verbose = flag.Bool("verbose", false, "Verbose output")
@@ -31,8 +33,10 @@ func main() {
 func setupVisionClient() {
 	receiver := vision.NewReceiver()
 	visualizationReceiver := visualization.NewReceiver()
+	trackedReceiver := tracked.NewReceiver()
 	publisher := client.NewPublisher()
 	publisher.DetectionProvider = receiver.CombinedDetectionFrames
+	publisher.TrackerProvider = trackedReceiver.TrackedFrames
 	publisher.GeometryProvider = geometryProvider(receiver)
 	publisher.LineSegmentProvider = visualizationReceiver.GetLineSegments
 	publisher.CircleProvider = visualizationReceiver.GetCircles
@@ -43,9 +47,12 @@ func setupVisionClient() {
 	receiver.MulticastServer.Verbose = *verbose
 	visualizationReceiver.MulticastServer.SkipInterfaces = skipIfis
 	visualizationReceiver.MulticastServer.Verbose = *verbose
+	trackedReceiver.MulticastServer.SkipInterfaces = skipIfis
+	trackedReceiver.MulticastServer.Verbose = *verbose
 
 	receiver.Start(*visionAddress)
 	visualizationReceiver.Start(*visualizationAddress)
+	trackedReceiver.Start(*trackedAddress)
 }
 
 func geometryProvider(receiver *vision.Receiver) func() *vision.SSL_GeometryData {

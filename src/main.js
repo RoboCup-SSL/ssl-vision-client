@@ -5,6 +5,9 @@ import VueNativeSock from 'vue-native-websocket'
 
 Vue.config.productionTip = false;
 
+const urlParams = new URLSearchParams(window.location.search);
+const sourceId = urlParams.get('sourceId');
+
 let wsAddress;
 if (process.env.NODE_ENV === 'development') {
     // use the default backend port
@@ -18,6 +21,10 @@ if (process.env.NODE_ENV === 'development') {
         protocol = 'wss:'
     }
     wsAddress = protocol + '//' + window.location.hostname + ':' + window.location.port + '/api/vision';
+}
+
+if (sourceId) {
+    wsAddress += `?sourceId=${sourceId}`
 }
 
 Vue.use(VueNativeSock, wsAddress, {

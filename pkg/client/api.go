@@ -1,12 +1,18 @@
 package client
 
+type Request struct {
+	ActiveSourceId string `json:"activeSourceId"`
+}
+
 type Package struct {
-	FieldWidth    float32 `json:"fieldWidth"`
-	FieldLength   float32 `json:"fieldLength"`
-	BoundaryWidth float32 `json:"boundaryWidth"`
-	GoalWidth     float32 `json:"goalWidth"`
-	GoalDepth     float32 `json:"goalDepth"`
-	Shapes        []Shape `json:"shapes"`
+	FieldWidth     float32           `json:"fieldWidth"`
+	FieldLength    float32           `json:"fieldLength"`
+	BoundaryWidth  float32           `json:"boundaryWidth"`
+	GoalWidth      float32           `json:"goalWidth"`
+	GoalDepth      float32           `json:"goalDepth"`
+	Shapes         []Shape           `json:"shapes"`
+	ActiveSourceId string            `json:"activeSourceId"`
+	Sources        map[string]string `json:"sources"`
 }
 
 type Shape struct {

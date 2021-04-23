@@ -2,8 +2,10 @@ package client
 
 import (
 	"fmt"
+	"github.com/RoboCup-SSL/ssl-vision-client/pkg/tracked"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/vision"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/visualization"
+	"math"
 	"sort"
 	"strconv"
 )
@@ -29,24 +31,48 @@ func (a ShapesByOrderNumber) Less(i, j int) bool { return a[i].OrderNumber < a[j
 
 func (p *Package) AddDetectionFrame(frame *vision.SSL_DetectionFrame) {
 	for _, ball := range frame.Balls {
-		p.Shapes = append(p.Shapes, Shape{OrderNumber: 3, Circle: createBallShape(ball)})
+		p.Shapes = append(p.Shapes, Shape{OrderNumber: 3, Circle: createBallShape(*ball.X, *ball.Y, 0)})
 	}
 
 	for _, bot := range frame.RobotsBlue {
-		p.Shapes = append(p.Shapes, Shape{OrderNumber: 1, Path: createBotPath(bot, blue)})
-		p.Shapes = append(p.Shapes, Shape{OrderNumber: 2, Text: createBotId(bot, white)})
+		p.Shapes = append(p.Shapes, Shape{OrderNumber: 1, Path: createBotPath(*bot.X, *bot.Y, *bot.Orientation, blue)})
+		p.Shapes = append(p.Shapes, Shape{OrderNumber: 2, Text: createBotId(*bot.RobotId, *bot.X, *bot.Y, white)})
 	}
 
 	for _, bot := range frame.RobotsYellow {
-		p.Shapes = append(p.Shapes, Shape{OrderNumber: 1, Path: createBotPath(bot, yellow)})
-		p.Shapes = append(p.Shapes, Shape{OrderNumber: 2, Text: createBotId(bot, black)})
+		p.Shapes = append(p.Shapes, Shape{OrderNumber: 1, Path: createBotPath(*bot.X, *bot.Y, *bot.Orientation, yellow)})
+		p.Shapes = append(p.Shapes, Shape{OrderNumber: 2, Text: createBotId(*bot.RobotId, *bot.X, *bot.Y, black)})
 	}
 }
 
-func createBallShape(ball *vision.SSL_DetectionBall) *Circle {
+func (p *Package) AddTrackedFrame(frame *tracked.TrackerWrapperPacket) {
+	if frame.TrackedFrame == nil {
+		return
+	}
+	for _, ball := range frame.TrackedFrame.Balls {
+		p.Shapes = append(p.Shapes, Shape{OrderNumber: 3, Circle: createBallShape(*ball.Pos.X*1000, *ball.Pos.Y*1000, *ball.Pos.Z*1000)})
+	}
+
+	for _, bot := range frame.TrackedFrame.Robots {
+		var botColor string
+		var strokeColor string
+		if *bot.RobotId.Team == tracked.Team_YELLOW {
+			botColor = yellow
+			strokeColor = black
+		} else {
+			botColor = blue
+			strokeColor = white
+		}
+		p.Shapes = append(p.Shapes, Shape{OrderNumber: 1, Path: createBotPath(*bot.Pos.X*1000, *bot.Pos.Y*1000, *bot.Orientation, botColor)})
+		p.Shapes = append(p.Shapes, Shape{OrderNumber: 2, Text: createBotId(*bot.RobotId.Id, *bot.Pos.X*1000, *bot.Pos.Y*1000, strokeColor)})
+	}
+}
+
+func createBallShape(x, y, z float32) *Circle {
+	heightFactor := 0.01*math.Abs(float64(z)) + 1
 	return &Circle{
-		Center: Point{*ball.X, -*ball.Y},
-		Radius: ballRadius,
+		Center: Point{x, -y},
+		Radius: float32(heightFactor) * ballRadius,
 		Style: Style{
 			StrokeWidth: &ballStrokeWidth,
 			Fill:        &orange,
@@ -112,11 +138,11 @@ func goalLinesPositive(geometry *vision.SSL_GeometryData) (lines []Shape) {
 	return
 }
 
-func createBotPath(bot *vision.SSL_DetectionRobot, fillColor string) *Path {
+func createBotPath(posX, posY, orientation float32, fillColor string) *Path {
 	b := Bot{center2Dribbler, botRadius}
-	x := float64(*bot.X)
-	y := -float64(*bot.Y)
-	o := float64(*bot.Orientation)
+	x := float64(posX)
+	y := -float64(posY)
+	o := float64(orientation)
 	return &Path{
 		D: []PathElement{
 			{Type: "M",
@@ -149,10 +175,10 @@ func createBotPath(bot *vision.SSL_DetectionRobot, fillColor string) *Path {
 	}
 }
 
-func createBotId(bot *vision.SSL_DetectionRobot, strokeColor string) *Text {
+func createBotId(id uint32, x, y float32, strokeColor string) *Text {
 	return &Text{
-		Text: strconv.Itoa(int(*bot.RobotId)),
-		P:    Point{*bot.X, -*bot.Y},
+		Text: strconv.Itoa(int(id)),
+		P:    Point{x, -y},
 		Style: Style{
 			Fill: &strokeColor,
 		},

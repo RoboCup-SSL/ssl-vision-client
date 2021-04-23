@@ -1,15 +1,18 @@
 <template>
     <div id="app">
+        <SourceSelector/>
         <Field/>
     </div>
 </template>
 
 <script>
     import Field from "./components/Field.vue";
+    import SourceSelector from "@/components/SourceSelector";
 
     export default {
         name: "app",
         components: {
+            SourceSelector,
             Field
         },
         computed: {
