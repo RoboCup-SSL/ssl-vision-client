@@ -33,6 +33,7 @@ func (r *Receiver) TrackedFrames() map[string]*TrackerWrapperPacket {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
+	r.cleanupOldSources()
 	frames := map[string]*TrackerWrapperPacket{}
 	for k, v := range r.frames {
 		frames[k] = v
@@ -61,11 +62,11 @@ func parseVisionWrapperPacket(data []byte) (message *TrackerWrapperPacket, err e
 	return
 }
 
-func (r *Receiver) cleanupDetections() {
-	for camId, t := range r.receivedTimes {
+func (r *Receiver) cleanupOldSources() {
+	for uuid, t := range r.receivedTimes {
 		if time.Now().Sub(t) > time.Second {
-			delete(r.receivedTimes, camId)
-			delete(r.frames, camId)
+			delete(r.receivedTimes, uuid)
+			delete(r.frames, uuid)
 		}
 	}
 }
