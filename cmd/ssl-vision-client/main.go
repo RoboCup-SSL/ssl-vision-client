@@ -15,7 +15,7 @@ import (
 var address = flag.String("address", ":8082", "The address on which the UI and API is served, default: :8082")
 var visionAddress = flag.String("visionAddress", "224.5.23.2:10006", "The multicast address of ssl-vision, default: 224.5.23.2:10006")
 var trackedAddress = flag.String("trackedAddress", "224.5.23.2:10010", "The multicast address of trackers, default: 224.5.23.2:10010")
-var visualizationAddress = flag.String("visualizationAddress", "224.5.23.2:10011", "The multicast address of visualization frames, default: 224.5.23.2:10011")
+var visualizationAddress = flag.String("visualizationAddress", "224.5.23.2:10012", "The multicast address of visualization frames, default: 224.5.23.2:10012")
 var skipInterfaces = flag.String("skipInterfaces", "", "Comma separated list of interface names to ignore when receiving multicast packets")
 var verbose = flag.Bool("verbose", false, "Verbose output")
 
