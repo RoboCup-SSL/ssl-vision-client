@@ -2,14 +2,11 @@
 
 # Fail on errors
 set -e
+# Print commands
+set -x
 
 # Update to latest protobuf compiler
-go get -u github.com/golang/protobuf/protoc-gen-go
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 
-for pkgDir in ./proto/*; do
-  # compile protobuf files in current directory
-  protoc -I"$pkgDir" \
-    -I"${GOPATH}/src" \
-    --go_out="$GOPATH/src" \
-    "${pkgDir}"/*.proto
-done
+# Generate all protobuf code
+protoc -I"./proto" -I"$GOPATH/src" --go_out="$GOPATH/src" proto/*.proto
