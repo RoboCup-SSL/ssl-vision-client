@@ -3,10 +3,12 @@ package main
 import (
 	"flag"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/client"
+	"github.com/RoboCup-SSL/ssl-vision-client/pkg/logfile"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/tracked"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/vision"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/visualization"
 	"github.com/gobuffalo/packr"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"strings"
@@ -18,19 +20,22 @@ var trackedAddress = flag.String("trackedAddress", "224.5.23.2:10010", "The mult
 var visualizationAddress = flag.String("visualizationAddress", "224.5.23.2:10012", "The multicast address of visualization frames, default: 224.5.23.2:10012")
 var skipInterfaces = flag.String("skipInterfaces", "", "Comma separated list of interface names to ignore when receiving multicast packets")
 var verbose = flag.Bool("verbose", false, "Verbose output")
+var logFileFolder = flag.String("logFileFolder", "./", "Base folder with log files to be served")
 
 func main() {
 	flag.Parse()
 
-	setupVisionClient()
-	setupUi()
-	err := http.ListenAndServe(*address, nil)
+	router := mux.NewRouter()
+	setupVisionClient(router)
+	setupLogFileService(router)
+	setupUi(router)
+	err := http.ListenAndServe(*address, router)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func setupVisionClient() {
+func setupVisionClient(router *mux.Router) {
 	receiver := vision.NewReceiver()
 	visualizationReceiver := visualization.NewReceiver()
 	trackedReceiver := tracked.NewReceiver()
@@ -40,7 +45,7 @@ func setupVisionClient() {
 	publisher.GeometryProvider = geometryProvider(receiver)
 	publisher.LineSegmentProvider = visualizationReceiver.GetLineSegments
 	publisher.CircleProvider = visualizationReceiver.GetCircles
-	http.HandleFunc("/api/vision", publisher.Handler)
+	router.HandleFunc("/api/vision", publisher.Handler)
 
 	skipIfis := parseSkipInterfaces()
 	receiver.MulticastServer.SkipInterfaces = skipIfis
@@ -53,6 +58,14 @@ func setupVisionClient() {
 	receiver.Start(*visionAddress)
 	visualizationReceiver.Start(*visualizationAddress)
 	trackedReceiver.Start(*trackedAddress)
+}
+
+func setupLogFileService(router *mux.Router) {
+	service := logfile.NewService(*logFileFolder)
+	service.Start()
+
+	router.HandleFunc("/api/logfiles", service.HandleGetLogFiles)
+	router.HandleFunc("/api/logfiles/{name}", service.HandleGetLogFileMetaData)
 }
 
 func geometryProvider(receiver *vision.Receiver) func() *vision.SSL_GeometryData {
@@ -85,7 +98,7 @@ func parseSkipInterfaces() []string {
 	return strings.Split(*skipInterfaces, ",")
 }
 
-func setupUi() {
+func setupUi(router *mux.Router) {
 	box := packr.NewBox("../../dist")
 
 	withResponseHeaders := func(h http.Handler) http.HandlerFunc {
@@ -97,7 +110,7 @@ func setupUi() {
 		}
 	}
 
-	http.Handle("/", withResponseHeaders(http.FileServer(box)))
+	router.PathPrefix("/").Handler(withResponseHeaders(http.FileServer(box)))
 	if box.Has("index.html") {
 		log.Printf("UI is available at http://%v", *address)
 	} else {
