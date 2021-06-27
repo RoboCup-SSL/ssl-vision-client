@@ -51,6 +51,7 @@ func (p *Package) AddTrackedFrame(frame *tracked.TrackerWrapperPacket) {
 	}
 	for _, ball := range frame.TrackedFrame.Balls {
 		p.Shapes = append(p.Shapes, Shape{OrderNumber: 3, Circle: createBallShape(*ball.Pos.X*1000, *ball.Pos.Y*1000, *ball.Pos.Z*1000)})
+		p.Shapes = append(p.Shapes, Shape{OrderNumber: 1, Circle: createBallHighlighter(*ball.Pos.X*1000, *ball.Pos.Y*1000)})
 	}
 
 	for _, bot := range frame.TrackedFrame.Robots {
@@ -76,6 +77,18 @@ func createBallShape(x, y, z float32) *Circle {
 		Style: Style{
 			StrokeWidth: &ballStrokeWidth,
 			Fill:        &orange,
+		},
+	}
+}
+
+func createBallHighlighter(x, y float32) *Circle {
+	return &Circle{
+		Center: Point{x, -y},
+		Radius: 500,
+		Style: Style{
+			Stroke:      &orange,
+			StrokeWidth: &lineWidth,
+			FillOpacity: &noFill,
 		},
 	}
 }
