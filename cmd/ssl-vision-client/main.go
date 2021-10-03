@@ -99,7 +99,7 @@ func setupUi() {
 
 	http.Handle("/", withResponseHeaders(http.FileServer(box)))
 	if box.Has("index.html") {
-		log.Printf("UI is available at http://%v", *address)
+		log.Printf("UI is available at http://localhost%v", *address)
 	} else {
 		log.Print("Backend-only version started. Run the UI separately or get a binary that has the UI included")
 	}
