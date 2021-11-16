@@ -85,7 +85,7 @@ func printContinuous(receiver *vision.Receiver) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			log.Print(string(b))
+			fmt.Println(string(b))
 		}
 	}
 	if !*noGeometry {
