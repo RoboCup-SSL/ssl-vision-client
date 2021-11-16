@@ -32,12 +32,12 @@ func (r *Receiver) Start(multicastAddress string) {
 	r.MulticastServer.Start(multicastAddress)
 }
 
-func (r *Receiver) Detections() (result map[int]SSL_DetectionFrame) {
+func (r *Receiver) Detections() (result map[int]*SSL_DetectionFrame) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
-	result = map[int]SSL_DetectionFrame{}
+	result = map[int]*SSL_DetectionFrame{}
 	for id, frame := range r.detections {
-		result[id] = *frame
+		result[id] = frame
 	}
 	return
 }
@@ -98,9 +98,5 @@ func (r *Receiver) cleanupDetections() {
 func (r *Receiver) CurrentGeometry() (geometry *SSL_GeometryData) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
-	if r.Geometry != nil {
-		geometry = new(SSL_GeometryData)
-		*geometry = *r.Geometry
-	}
-	return
+	return r.Geometry
 }

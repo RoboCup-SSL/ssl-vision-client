@@ -67,7 +67,7 @@ func printFullscreen(receiver *vision.Receiver) {
 		if !*noDetections {
 			for camId, frame := range receiver.Detections() {
 				fmt.Println("Camera ", camId)
-				fmt.Println(proto.MarshalTextString(&frame))
+				fmt.Println(proto.MarshalTextString(frame))
 				fmt.Println()
 				fmt.Println()
 			}
