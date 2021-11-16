@@ -2,7 +2,7 @@ package tracked
 
 import (
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/sslnet"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"log"
 	"sync"
 	"time"
