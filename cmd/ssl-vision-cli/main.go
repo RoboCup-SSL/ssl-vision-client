@@ -7,6 +7,7 @@ import (
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/vision"
 	"github.com/golang/protobuf/proto"
 	"log"
+	"math"
 	"os"
 	"os/signal"
 	"syscall"
@@ -81,6 +82,13 @@ func printFullscreen(receiver *vision.Receiver) {
 func printContinuous(receiver *vision.Receiver) {
 	if !*noDetections {
 		receiver.ConsumeDetections = func(frame *vision.SSL_DetectionFrame) {
+			robots := append(frame.RobotsBlue, frame.RobotsYellow...)
+			for _, robot := range robots {
+				// ssl-vision may send a NaN confidence and the json serialization can not deal with it...
+				if math.IsNaN(float64(*robot.Confidence)) {
+					*robot.Confidence = 0
+				}
+			}
 			b, err := json.Marshal(frame)
 			if err != nil {
 				log.Fatal(err)
