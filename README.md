@@ -24,7 +24,7 @@ By default, the UI is available at http://localhost:8082
 
 ### Requirements
 You need to install following dependencies first: 
- * Go >= 1.14
+ * Go >= 1.17
  * Node >= 10
  * Yarn
 

@@ -4,7 +4,7 @@ COPY . .
 RUN yarn install
 RUN yarn build
 
-FROM golang:1.14-alpine AS build_go
+FROM golang:1.17-alpine AS build_go
 WORKDIR /go/src/github.com/RoboCup-SSL/ssl-vision-client
 COPY . .
 COPY --from=build_node /tmp/ssl-vision-client/dist dist
