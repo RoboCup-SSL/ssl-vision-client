@@ -1,10 +1,14 @@
 package logfile
 
-import "time"
+import (
+	"github.com/RoboCup-SSL/ssl-go-tools/pkg/persistence"
+	"time"
+)
 
 type MetaData struct {
-	NumFrames uint32        `json:"num_frames"`
-	Duration  time.Duration `json:"duration"`
+	StartTime    time.Time               `json:"start-time"`
+	EndTime      time.Time               `json:"end-time"`
+	MessageTypes []persistence.MessageId `json:"message-ids"`
 }
 
 type MetaDataList struct {

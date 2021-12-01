@@ -66,6 +66,7 @@ func setupLogFileService(router *mux.Router) {
 
 	router.HandleFunc("/api/logfiles", service.HandleGetLogFiles)
 	router.HandleFunc("/api/logfiles/{name}", service.HandleGetLogFileMetaData)
+	router.HandleFunc("/api/logfiles/{name}/{messageType}/{timestamp}", service.HandleGetLogFileFrame)
 }
 
 func geometryProvider(receiver *vision.Receiver) func() *vision.SSL_GeometryData {
