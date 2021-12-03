@@ -6,5 +6,5 @@ GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Fo
 
 ###
 
-GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/3/1000000
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/3/1624804985414544183
 Accept: application/x-protobuf

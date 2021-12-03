@@ -4,12 +4,11 @@ import (
 	"github.com/RoboCup-SSL/ssl-go-tools/pkg/persistence"
 	"github.com/pkg/errors"
 	"log"
-	"time"
 )
 
 type Logfile struct {
 	reader    *persistence.Reader
-	offsetMap map[persistence.MessageId]map[time.Time]int64
+	offsetMap map[persistence.MessageId]map[int64]int64
 	metaData  MetaData
 }
 
@@ -27,15 +26,15 @@ func NewLogfile(filename string) (*Logfile, error) {
 	if offsets, err := l.reader.ReadIndex(); err != nil {
 		return l, nil
 	} else {
-		l.offsetMap = map[persistence.MessageId]map[time.Time]int64{}
-		var firstTime, lastTime *time.Time
+		l.offsetMap = map[persistence.MessageId]map[int64]int64{}
+		var firstTime, lastTime *int64
 		for _, offset := range offsets {
 			if offsetTime, offsetMsgType, err := l.reader.ReadMessageTimeAndType(offset); err != nil {
 				log.Println("Failed to read message time and type: ", err)
 			} else {
 				offsetMap, offsetMapExists := l.offsetMap[*offsetMsgType]
 				if !offsetMapExists {
-					offsetMap = map[time.Time]int64{}
+					offsetMap = map[int64]int64{}
 					l.offsetMap[*offsetMsgType] = offsetMap
 				}
 				offsetMap[*offsetTime] = offset
@@ -66,7 +65,7 @@ func (l *Logfile) GetMetaData() MetaData {
 	return l.metaData
 }
 
-func (l *Logfile) GetFrame(messageType persistence.MessageId, t time.Time) (*persistence.Message, error) {
+func (l *Logfile) GetFrame(messageType persistence.MessageId, t int64) (*persistence.Message, error) {
 	if offsetMap, messageTypeExists := l.offsetMap[messageType]; !messageTypeExists {
 		return nil, errors.Errorf("Message type unknown: %s", messageType.String())
 	} else {
@@ -78,12 +77,12 @@ func (l *Logfile) GetFrame(messageType persistence.MessageId, t time.Time) (*per
 	}
 }
 
-func findNearestOffset(offsetMap map[time.Time]int64, t time.Time) int64 {
-	var prevTime time.Time
+func findNearestOffset(offsetMap map[int64]int64, t int64) int64 {
+	var prevTime int64
 	var prevOffset int64
 	for offsetTime, offset := range offsetMap {
-		if offsetTime.After(t) {
-			if offsetTime.Sub(t) > t.Sub(prevTime) {
+		if offsetTime > t {
+			if offsetTime-t > t-prevTime {
 				return prevOffset
 			}
 			return offset

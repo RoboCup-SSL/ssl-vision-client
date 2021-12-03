@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"time"
 )
 
 func (s *Service) handle(w http.ResponseWriter, _ *http.Request, entity interface{}) {
@@ -95,7 +94,7 @@ func (s *Service) HandleGetLogFileFrame(w http.ResponseWriter, r *http.Request) 
 		badRequest(w, "Could not parse requestedTime '%s': %s", requestedTime, err)
 		return
 	}
-	message, err := logFile.GetFrame(persistence.MessageId(messageId), time.Unix(0, t))
+	message, err := logFile.GetFrame(persistence.MessageId(messageId), t)
 	if err != nil {
 		badRequest(w, "Could not get frame: %s", err)
 		return

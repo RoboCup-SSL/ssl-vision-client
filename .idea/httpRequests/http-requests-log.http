@@ -1,0 +1,163 @@
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/3/1624804985414544183
+Accept: application/x-protobuf
+
+<> 2021-12-03T200705.200.protobuf
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/3/1624804985414544184
+Accept: application/x-protobuf
+
+<> 2021-12-03T200701.200.protobuf
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/3/1624804985414544182
+Accept: application/x-protobuf
+
+<> 2021-12-03T200641.200.protobuf
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/3/1624804985414544183
+Accept: application/x-protobuf
+
+<> 2021-12-03T200624.200.protobuf
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/3/1624804985414544182
+Accept: application/x-protobuf
+
+<> 2021-12-03T200618.200.protobuf
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/3/1624804985414544182
+Accept: application/x-protobuf
+
+<> 2021-12-03T200612.200.protobuf
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/3/1624804985414544183
+Accept: application/x-protobuf
+
+<> 2021-12-03T200603.200.protobuf
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log
+
+<> 2021-12-03T200552.200.json
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/3/1000000
+Accept: application/json
+
+<> 2021-12-03T192204.502.html
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/3/1000000
+Accept: application/x-protobuf
+
+<> 2021-12-03T192151.200.protobuf
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/3/1000000
+
+<> 2021-12-03T192129.400.txt
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/3/1000000
+
+<> 2021-12-01T213239.200.txt
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/3/0
+
+<> 2021-12-01T213231.200.txt
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/3/0
+
+<> 2021-12-01T213228.200.txt
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/3/0
+
+<> 2021-12-01T213225.200.txt
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/3/0
+
+<> 2021-12-01T213207.200.txt
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log
+
+<> 2021-12-01T213133.200.json
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/0
+
+<> 2021-12-01T213122.404.txt
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/0
+
+<> 2021-12-01T212959.404.txt
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log
+
+<> 2021-12-01T212956.200.json
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/0
+
+<> 2021-12-01T212938.404.txt
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log/0
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log
+
+<> 2021-12-01T212742.200.json
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log
+
+<> 2021-12-01T212730.200.json
+
+###
+
+GET http://localhost:8082/api/logfiles/2021-06-27_14-04_TIGERs_Mannheim-vs-ER-Force.log
+
+<> 2021-12-01T212522.502.html
+
+###
+
+GET http://localhost:8082/api/logfiles
+
+<> 2021-12-01T212455.200.json
+
+###
+
