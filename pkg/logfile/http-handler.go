@@ -120,7 +120,7 @@ func (s *Service) HandleGetLogFileFrame(w http.ResponseWriter, r *http.Request) 
 
 func badRequest(w http.ResponseWriter, format string, args ...interface{}) {
 	w.WriteHeader(http.StatusBadRequest)
-	message := fmt.Sprintf(format, args)
+	message := fmt.Sprintf(format, args...)
 	if _, err := w.Write([]byte(message)); err != nil {
 		log.Println("Failed to respond: ", err)
 	}
