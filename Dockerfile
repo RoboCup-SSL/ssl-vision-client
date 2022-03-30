@@ -14,7 +14,7 @@ WORKDIR cmd/ssl-vision-client
 RUN GOOS=linux GOARCH=amd64 packr build -o ../../release/ssl-vision-client_linux_amd64
 
 # Start fresh from a smaller image
-FROM alpine:3.9
+FROM alpine:3.15
 COPY --from=build_go /go/src/github.com/RoboCup-SSL/ssl-vision-client/release/ssl-vision-client_linux_amd64 /app/ssl-vision-client
 EXPOSE 8082
 ENTRYPOINT ["/app/ssl-vision-client"]

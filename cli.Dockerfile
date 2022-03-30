@@ -7,7 +7,7 @@ RUN go get -v -t -d ./...
 RUN go install ./...
 
 # Start fresh from a smaller image
-FROM alpine:3.9
+FROM alpine:3.15
 COPY --from=build /go/bin/ssl-vision-cli /app/ssl-vision-cli
 ENTRYPOINT ["/app/ssl-vision-cli"]
 CMD []
