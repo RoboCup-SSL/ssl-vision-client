@@ -1,7 +1,6 @@
 <script setup lang="ts">
-
 import {inject} from "vue";
-import {VisionApi} from "@/providers/backend/VisionApi";
+import type {VisionApi} from "@/providers/backend/VisionApi";
 
 const props = defineProps<{
   sources: { string: string },

@@ -2,59 +2,63 @@ const fieldWidth = 9000;
 const fieldLength = 12000;
 const centerCircleRadius = 500;
 
+export interface ShapeStyle {
+    stroke?: string
+    strokeWidth?: number
+    fill?: string
+    fillOpacity?: number
+    font?: string
+}
+
 export interface Point {
-    x: number,
-    y: number,
+    x: number
+    y: number
 }
 
-export interface LineShape {
-    p1: Point,
-    p2: Point,
+export interface LineShape extends ShapeStyle {
+    p1: Point
+    p2: Point
 }
 
-export interface CircleShape {
-    center: Point,
-    radius: number,
-    stroke: string,
-    strokeWidth: number,
-    fill: string,
-    fillOpacity: number,
+export interface CircleShape extends ShapeStyle {
+    center: Point
+    radius: number
 }
 
-export interface TextShape {
-    text: string,
-    p: Point,
-    fill: string,
+export interface TextShape extends ShapeStyle {
+    text: string
+    p: Point
 }
 
 export interface PathSegment {
     type: 'M' | 'A' | 'L'
-    args: number[],
+    args: number[]
 }
 
-export interface PathShape {
-    d: PathSegment[],
-    stroke: string,
-    strokeWidth: number,
-    fill: string,
-    fillOpacity: number
+export interface PathShape extends ShapeStyle {
+    d: PathSegment[]
 }
 
-export type Shape = { line: LineShape } | { circle: CircleShape } | { text: TextShape } | { path: PathShape }
+export type Shape = {
+    line?: LineShape
+    circle?: CircleShape
+    text?: TextShape
+    path?: PathShape
+}
 
 export interface Field {
-    activeSourceId: string,
-    sources: any,
-    fieldWidth: number,
-    fieldLength: number,
-    boundaryWidth: number,
-    penAreaWidth: number,
-    penAreaDepth: number,
-    goalWidth: number,
-    goalDepth: number,
-    centerCircleRadius: number,
-    ballRadius: number,
-    shapes: Shape[],
+    activeSourceId: string
+    sources: any
+    fieldWidth: number
+    fieldLength: number
+    boundaryWidth: number
+    penAreaWidth: number
+    penAreaDepth: number
+    goalWidth: number
+    goalDepth: number
+    centerCircleRadius: number
+    ballRadius: number
+    shapes: Shape[]
 }
 
 export const defaultField: Field = {

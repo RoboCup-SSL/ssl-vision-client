@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {computed, onBeforeUnmount, onMounted, ref} from "vue";
-import type {Field, PathSegment, Point} from "@/field";
+import type {CSSProperties} from "vue"
+import type {Field, PathSegment, Point, ShapeStyle} from "@/field";
 
 const props = defineProps<{
   field: Field,
@@ -131,24 +132,28 @@ const getFieldTransformation = computed(() => {
   return transform + scale
 })
 
-const defStyle = {
-  strokeWidth: 10,
-  stroke: 'white',
-  fillOpacity: 1,
-}
-const defFontStyle = {
-  strokeWidth: 0,
-  textAnchor: "middle",
-  dominantBaseline: "central",
-  font: "bold 7em sans-serif",
+function shapeStyle(style: ShapeStyle): CSSProperties {
+  const defStyle = {
+    stroke: 'white',
+    strokeWidth: 10,
+    fill: "",
+    fillOpacity: 1,
+    textAnchor: "middle",
+    dominantBaseline: "central",
+    font: "bold 7em sans-serif",
+  }
+  return {...defStyle, ...style} as CSSProperties
 }
 
 onMounted(() => {
   // $nextTick(function () {
   window.addEventListener('resize', updateCanvasWidth)
   window.addEventListener('resize', updateCanvasHeight)
-  canvas.value?.addEventListener("wheel", onScroll)
   document.addEventListener('keydown', onClick)
+  canvas.value?.addEventListener("wheel", onScroll)
+  canvas.value?.addEventListener("mousemove", onMouseMove)
+  canvas.value?.addEventListener("mousedown", onMouseDown)
+  canvas.value?.addEventListener("mouseup", onMouseUp)
 
   updateCanvasWidth()
   updateCanvasHeight()
@@ -156,8 +161,11 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateCanvasWidth)
   window.removeEventListener('resize', updateCanvasHeight)
-  canvas.value?.removeEventListener("wheel", onScroll)
   document.removeEventListener('keydown', onClick)
+  canvas.value?.removeEventListener("wheel", onScroll)
+  canvas.value?.removeEventListener("mousemove", onMouseMove)
+  canvas.value?.removeEventListener("mousedown", onMouseDown)
+  canvas.value?.removeEventListener("mouseup", onMouseUp)
 })
 
 </script>
@@ -165,9 +173,6 @@ onBeforeUnmount(() => {
 <template>
   <svg
     ref="canvas"
-    @mousemove="onMouseMove"
-    @mousedown="onMouseDown"
-    @mouseup="onMouseUp"
     :viewBox="viewBox"
   >
     <!-- rotate field -->
@@ -191,7 +196,7 @@ onBeforeUnmount(() => {
           :y1="s.line.p1.y"
           :x2="s.line.p2.x"
           :y2="s.line.p2.y"
-          :style="[defStyle, s.line]"
+          :style="shapeStyle(s.line)"
         />
 
         <circle
@@ -200,14 +205,14 @@ onBeforeUnmount(() => {
           :cx="s.circle.center.x"
           :cy="s.circle.center.y"
           :r="s.circle.radius"
-          :style="[defStyle, s.circle]"
+          :style="shapeStyle(s.circle)"
         />
 
         <path
           v-if="s.path"
           :key="'shape-' + i"
           :d="pathFromD(s.path.d)"
-          :style="[defStyle, s.path]"
+          :style="shapeStyle(s.path)"
         />
 
         <text
@@ -216,7 +221,7 @@ onBeforeUnmount(() => {
           :x="s.text.p.x"
           :y="s.text.p.y"
           :transform="textTransform(s.text.p)"
-          :style="[defStyle, defFontStyle, s.text]"
+          :style="shapeStyle(s.text)"
         >
           {{ s.text.text }}
         </text>
