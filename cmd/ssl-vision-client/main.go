@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
+	"github.com/RoboCup-SSL/ssl-vision-client/frontend"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/client"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/tracked"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/vision"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/visualization"
-	"github.com/gobuffalo/packr"
 	"log"
 	"net/http"
 	"strings"
@@ -23,7 +23,10 @@ func main() {
 	flag.Parse()
 
 	setupVisionClient()
-	setupUi()
+	frontend.HandleUi()
+
+	log.Printf("UI is available at %v", formattedAddress())
+
 	err := http.ListenAndServe(*address, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -85,22 +88,9 @@ func parseSkipInterfaces() []string {
 	return strings.Split(*skipInterfaces, ",")
 }
 
-func setupUi() {
-	box := packr.NewBox("../../dist")
-
-	withResponseHeaders := func(h http.Handler) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-			// Set some header.
-			w.Header().Add("Access-Control-Allow-Origin", "*")
-			// Serve with the actual handler.
-			h.ServeHTTP(w, r)
-		}
+func formattedAddress() string {
+	if strings.HasPrefix(*address, ":") {
+		return "http://localhost" + *address
 	}
-
-	http.Handle("/", withResponseHeaders(http.FileServer(box)))
-	if box.Has("index.html") {
-		log.Printf("UI is available at http://%v", *address)
-	} else {
-		log.Print("Backend-only version started. Run the UI separately or get a binary that has the UI included")
-	}
+	return "http://" + *address
 }

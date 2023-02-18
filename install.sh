@@ -1,11 +1,13 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
-yarn install
-yarn build
+# frontend
+(
+  cd frontend
+  npm install
+  npm run build
+)
 
-go get -v -d ./...
-cd cmd/ssl-vision-client
-go get -v github.com/gobuffalo/packr/packr
-packr install
+# backend
+go install -v ./cmd/ssl-vision-client
