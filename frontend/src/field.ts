@@ -44,7 +44,7 @@ export type Shape = { line: LineShape } | { circle: CircleShape } | { text: Text
 
 export interface Field {
     activeSourceId: string,
-    sources: string[],
+    sources: any,
     fieldWidth: number,
     fieldLength: number,
     boundaryWidth: number,
@@ -59,7 +59,7 @@ export interface Field {
 
 export const defaultField: Field = {
     activeSourceId: '',
-    sources: [],
+    sources: {},
     fieldWidth: fieldWidth,
     fieldLength: fieldLength,
     boundaryWidth: 300,
