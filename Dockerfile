@@ -1,4 +1,4 @@
-FROM node:18-alpine AS build_node
+FROM node:19-alpine AS build_node
 COPY frontend /tmp/ssl-vision-client/frontend
 WORKDIR /tmp/ssl-vision-client/frontend
 RUN npm install
