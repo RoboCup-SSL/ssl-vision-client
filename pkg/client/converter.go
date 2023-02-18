@@ -189,11 +189,14 @@ func createBotPath(posX, posY, orientation float32, fillColor string) *Path {
 }
 
 func createBotId(id uint32, x, y float32, strokeColor string) *Text {
+	strokeWidth := float32(0)
 	return &Text{
 		Text: strconv.Itoa(int(id)),
 		P:    Point{x, -y},
 		Style: Style{
-			Fill: &strokeColor,
+			Stroke:      &strokeColor,
+			Fill:        &strokeColor,
+			StrokeWidth: &strokeWidth,
 		},
 	}
 }

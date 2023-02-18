@@ -2,25 +2,25 @@ version: 2
 jobs:
   frontend:
     docker:
-      - image: circleci/node:16.13.1
+      - image: cimg/node:lts
     steps:
       - checkout
       - run:
           name: "Install dependencies"
-          command: yarn install
+          working_directory: frontend
+          command: npm install
       - run:
           name: "Build"
-          command: yarn build
+          working_directory: frontend
+          command: npm run build
       - persist_to_workspace:
           root: .
           paths:
-            - dist/*
+            - frontend/dist/*
 
   backend:
     docker:
-      - image: circleci/golang:1.17
-
-    working_directory: /go/src/github.com/RoboCup-SSL/ssl-vision-client
+      - image: cimg/go:1.20
     steps:
       - checkout
       - attach_workspace:
@@ -30,10 +30,9 @@ jobs:
       - run:
           working_directory: cmd/ssl-vision-client
           command: |
-            go get -v github.com/gobuffalo/packr/packr
-            GOOS=linux GOARCH=amd64 packr build -o ../../release/ssl-vision-client_linux_amd64
-            GOOS=darwin GOARCH=amd64 packr build -o ../../release/ssl-vision-client_darwin_amd64
-            GOOS=windows GOARCH=amd64 packr build -o ../../release/ssl-vision-client_windows_amd64.exe
+            GOOS=linux GOARCH=amd64 go build -o ../../release/ssl-vision-client_linux_amd64
+            GOOS=darwin GOARCH=amd64 go build -o ../../release/ssl-vision-client_darwin_amd64
+            GOOS=windows GOARCH=amd64 go build -o ../../release/ssl-vision-client_windows_amd64.exe
       - run:
           working_directory: cmd/ssl-vision-cli
           command: |
@@ -47,7 +46,7 @@ jobs:
 
   publish-github-release:
     docker:
-      - image: circleci/golang:1.17
+      - image: cimg/go:1.20
     steps:
       - attach_workspace:
           at: .
@@ -55,17 +54,35 @@ jobs:
           name: "Prepare artifacts"
           working_directory: release
           command: |
-            mv ssl-vision-client_linux_amd64 ssl-vision-client_${CIRCLE_TAG}_linux_amd64
-            mv ssl-vision-client_darwin_amd64 ssl-vision-client_${CIRCLE_TAG}_darwin_amd64
-            mv ssl-vision-client_windows_amd64.exe ssl-vision-client_${CIRCLE_TAG}_windows_amd64.exe
-            mv ssl-vision-cli_linux_amd64 ssl-vision-cli_${CIRCLE_TAG}_linux_amd64
-            mv ssl-vision-cli_darwin_amd64 ssl-vision-cli_${CIRCLE_TAG}_darwin_amd64
-            mv ssl-vision-cli_windows_amd64.exe ssl-vision-cli_${CIRCLE_TAG}_windows_amd64.exe
+            mkdir gh
+            mv ssl-vision-client_linux_amd64 gh/ssl-vision-client_${CIRCLE_TAG}_linux_amd64
+            mv ssl-vision-client_darwin_amd64 gh/ssl-vision-client_${CIRCLE_TAG}_darwin_amd64
+            mv ssl-vision-client_windows_amd64.exe gh/ssl-vision-client_${CIRCLE_TAG}_windows_amd64.exe
+            mv ssl-vision-cli_linux_amd64 gh/ssl-vision-cli_${CIRCLE_TAG}_linux_amd64
+            mv ssl-vision-cli_darwin_amd64 gh/ssl-vision-cli_${CIRCLE_TAG}_darwin_amd64
+            mv ssl-vision-cli_windows_amd64.exe gh/ssl-vision-cli_${CIRCLE_TAG}_windows_amd64.exe
       - run:
           name: "Publish Release on GitHub"
           command: |
-            go get github.com/tcnksm/ghr
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./release/
+            go install github.com/tcnksm/ghr@v0.16.0
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./release/gh/
+
+  docker:
+    docker:
+      - image: cimg/base:2023.02
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.18
+      - run: |
+          TAG=${CIRCLE_TAG:1}
+          TAG=${TAG:-latest}
+          docker build -t robocupssl/ssl-vision-client:$TAG .
+          docker login -u "${DOCKER_HUB_USERNAME}" -p "${DOCKER_HUB_PASSWORD}"
+          docker push robocupssl/ssl-vision-client:$TAG
+          docker build -t robocupssl/ssl-vision-cli:$TAG .
+          docker login -u "${DOCKER_HUB_USERNAME}" -p "${DOCKER_HUB_PASSWORD}"
+          docker push robocupssl/ssl-vision-cli:$TAG
 
 workflows:
   version: 2
@@ -82,10 +99,18 @@ workflows:
             tags:
               only: /.*/
       - publish-github-release:
+          context: github
           requires:
             - backend
           filters:
             branches:
               ignore: /.*/
+            tags:
+              only: /^v.*/
+      - docker:
+          context: docker hub
+          filters:
+            branches:
+              only: master
             tags:
               only: /^v.*/

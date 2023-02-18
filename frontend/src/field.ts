@@ -1,13 +1,67 @@
-import Vue from "vue";
-import Vuex from "vuex";
+const fieldWidth = 9000;
+const fieldLength = 12000;
+const centerCircleRadius = 500;
 
-Vue.use(Vuex);
+export interface ShapeStyle {
+    stroke?: string
+    strokeWidth?: number
+    fill?: string
+    fillOpacity?: number
+    font?: string
+}
 
-let fieldWidth = 9000;
-let fieldLength = 12000;
-let centerCircleRadius = 500;
+export interface Point {
+    x: number
+    y: number
+}
 
-let defaultField = {
+export interface LineShape extends ShapeStyle {
+    p1: Point
+    p2: Point
+}
+
+export interface CircleShape extends ShapeStyle {
+    center: Point
+    radius: number
+}
+
+export interface TextShape extends ShapeStyle {
+    text: string
+    p: Point
+}
+
+export interface PathSegment {
+    type: 'M' | 'A' | 'L'
+    args: number[]
+}
+
+export interface PathShape extends ShapeStyle {
+    d: PathSegment[]
+}
+
+export type Shape = {
+    line?: LineShape
+    circle?: CircleShape
+    text?: TextShape
+    path?: PathShape
+}
+
+export interface Field {
+    activeSourceId: string
+    sources: any
+    fieldWidth: number
+    fieldLength: number
+    boundaryWidth: number
+    penAreaWidth: number
+    penAreaDepth: number
+    goalWidth: number
+    goalDepth: number
+    centerCircleRadius: number
+    ballRadius: number
+    shapes: Shape[]
+}
+
+export const defaultField: Field = {
     activeSourceId: '',
     sources: {},
     fieldWidth: fieldWidth,
@@ -84,7 +138,7 @@ let defaultField = {
                     }
                 ],
                 stroke: 'black',
-                strokeWidth: '10',
+                strokeWidth: 10,
                 fill: 'yellow',
                 fillOpacity: 1
             }
@@ -97,25 +151,4 @@ let defaultField = {
             }
         }
     ],
-};
-
-export default new Vuex.Store({
-    state: {
-        field: defaultField
-    },
-    mutations: {
-        SOCKET_ONOPEN() {
-        },
-        SOCKET_ONCLOSE() {
-        },
-        SOCKET_ONERROR() {
-        },
-        SOCKET_ONMESSAGE(state, message) {
-            state.field = message;
-        },
-        SOCKET_RECONNECT() {
-        },
-        SOCKET_RECONNECT_ERROR() {
-        },
-    }
-});
+}
