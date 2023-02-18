@@ -6,8 +6,12 @@ RUN npm run build
 
 FROM golang:1.20-alpine AS build_go
 WORKDIR /go/src/github.com/RoboCup-SSL/ssl-vision-client
-COPY . .
-COPY --from=build_node /tmp/ssl-vision-client/frontend/dist dist
+COPY cmd cmd
+COPY pkg pkg
+COPY frontend/embed.go frontend/embed.go
+COPY go.mod .
+COPY go.sum .
+COPY --from=build_node /tmp/ssl-vision-client/frontend/dist frontend/dist
 RUN go install -v ./cmd/ssl-vision-client
 
 # Start fresh from a smaller image
