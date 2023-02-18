@@ -1,21 +1,19 @@
-FROM node:10.22.0-jessie AS build_node
-WORKDIR /tmp/ssl-vision-client
-COPY . .
-RUN yarn install
-RUN yarn build
+FROM node:18-alpine AS build_node
+COPY frontend /tmp/ssl-vision-client/frontend
+WORKDIR /tmp/ssl-vision-client/frontend
+RUN npm install
+RUN npm run build
 
-FROM golang:1.18-alpine AS build_go
+FROM golang:1.20-alpine AS build_go
 WORKDIR /go/src/github.com/RoboCup-SSL/ssl-vision-client
 COPY . .
-COPY --from=build_node /tmp/ssl-vision-client/dist dist
-RUN go get -v -t -d ./...
-RUN go get -v github.com/gobuffalo/packr/packr
-WORKDIR cmd/ssl-vision-client
-RUN GOOS=linux GOARCH=amd64 packr build -o ../../release/ssl-vision-client_linux_amd64
+COPY --from=build_node /tmp/ssl-vision-client/frontend/dist dist
+RUN go install -v ./cmd/ssl-vision-client
 
 # Start fresh from a smaller image
-FROM alpine:3.15
-COPY --from=build_go /go/src/github.com/RoboCup-SSL/ssl-vision-client/release/ssl-vision-client_linux_amd64 /app/ssl-vision-client
+FROM alpine:3
+COPY --from=build_go /go/bin/ssl-vision-client /app/ssl-vision-client
+USER 1000
 EXPOSE 8082
 ENTRYPOINT ["/app/ssl-vision-client"]
 CMD []
