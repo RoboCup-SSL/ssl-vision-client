@@ -1,6 +1,10 @@
-/node_modules
-/dist
-/.git
-/Dockerfile
-/.idea
-/.vscode
+*
+!cmd
+!frontend
+!internal
+!pkg
+!go.mod
+!go.sum
+
+frontend/node_modules
+frontend/dist

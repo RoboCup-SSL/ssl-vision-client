@@ -1,6 +1,12 @@
-version: 2
+version: 2.1
+parameters:
+  cmds:
+    type: string
+    default: "ssl-vision-client ssl-vision-cli"
+
 jobs:
-  frontend:
+  build_node:
+    resource_class: medium
     docker:
       - image: cimg/node:lts
     steps:
@@ -18,99 +24,110 @@ jobs:
           paths:
             - frontend/dist/*
 
-  backend:
+  test_go:
+    resource_class: medium
     docker:
-      - image: cimg/go:1.20
+      - image: cimg/go:1.20.2
     steps:
       - checkout
       - attach_workspace:
           at: .
       - run: go get -v -t -d ./...
-      - run: go test -v ./...
-      - run:
-          working_directory: cmd/ssl-vision-client
-          command: |
-            GOOS=linux GOARCH=amd64 go build -o ../../release/ssl-vision-client_linux_amd64
-            GOOS=darwin GOARCH=amd64 go build -o ../../release/ssl-vision-client_darwin_amd64
-            GOOS=windows GOARCH=amd64 go build -o ../../release/ssl-vision-client_windows_amd64.exe
-      - run:
-          working_directory: cmd/ssl-vision-cli
-          command: |
-            GOOS=linux GOARCH=amd64 go build -o ../../release/ssl-vision-cli_linux_amd64
-            GOOS=darwin GOARCH=amd64 go build -o ../../release/ssl-vision-cli_darwin_amd64
-            GOOS=windows GOARCH=amd64 go build -o ../../release/ssl-vision-cli_windows_amd64.exe
+      - run: go test -v -covermode=count -coverprofile=count.out ./...
+      - run: go tool cover -html=count.out -o coverage.html
+      - store_artifacts:
+          path: coverage.html
+          destination: coverage
+
+  build_go:
+    resource_class: large
+    docker:
+      - image: cimg/go:1.20.2
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run: go get -v -t -d ./...
+      - run: |
+          set -u
+          version=${CIRCLE_TAG:-}
+          for cmd in << pipeline.parameters.cmds >>; do
+            GOOS=linux GOARCH=amd64 go build -o ./release/${cmd}_${version}_linux_amd64 ./cmd/${cmd}
+            GOOS=linux GOARCH=arm64 go build -o ./release/${cmd}_${version}_linux_arm64 ./cmd/${cmd}
+            GOOS=linux GOARCH=arm go build -o ./release/${cmd}_${version}_linux_arm ./cmd/${cmd}
+            GOOS=darwin GOARCH=amd64 go build -o ./release/${cmd}_${version}_darwin_amd64 ./cmd/${cmd}
+            GOOS=darwin GOARCH=arm64 go build -o ./release/${cmd}_${version}_darwin_arm64 ./cmd/${cmd}
+            GOOS=windows GOARCH=amd64 go build -o ./release/${cmd}_${version}_windows_amd64.exe ./cmd/${cmd}
+          done
       - persist_to_workspace:
           root: .
           paths:
             - release/*
 
-  publish-github-release:
+  publish_gh:
+    resource_class: small
     docker:
-      - image: cimg/go:1.20
+      - image: cimg/go:1.20.2
     steps:
       - attach_workspace:
           at: .
-      - run:
-          name: "Prepare artifacts"
-          working_directory: release
-          command: |
-            mkdir gh
-            mv ssl-vision-client_linux_amd64 gh/ssl-vision-client_${CIRCLE_TAG}_linux_amd64
-            mv ssl-vision-client_darwin_amd64 gh/ssl-vision-client_${CIRCLE_TAG}_darwin_amd64
-            mv ssl-vision-client_windows_amd64.exe gh/ssl-vision-client_${CIRCLE_TAG}_windows_amd64.exe
-            mv ssl-vision-cli_linux_amd64 gh/ssl-vision-cli_${CIRCLE_TAG}_linux_amd64
-            mv ssl-vision-cli_darwin_amd64 gh/ssl-vision-cli_${CIRCLE_TAG}_darwin_amd64
-            mv ssl-vision-cli_windows_amd64.exe gh/ssl-vision-cli_${CIRCLE_TAG}_windows_amd64.exe
-      - run:
-          name: "Publish Release on GitHub"
-          command: |
-            go install github.com/tcnksm/ghr@v0.16.0
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./release/gh/
+      - run: |
+          set -u
+          go install github.com/tcnksm/ghr@v0.16.0
+          ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete -generatenotes ${CIRCLE_TAG} ./release
 
-  docker:
+  build_docker:
+    resource_class: small
     docker:
-      - image: cimg/base:2023.02
+      - image: cimg/base:2023.04
     steps:
       - checkout
       - setup_remote_docker:
           version: 20.10.18
       - run: |
+          for cmd in << pipeline.parameters.cmds >>; do
+            docker build -f ./cmd/${cmd}/Dockerfile -t robocupssl/${cmd}:latest .
+          done
+
+  publish_docker:
+    resource_class: small
+    docker:
+      - image: cimg/base:2023.04
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.18
+      - run: |
+          # Parse version from tag (removing 'v' prefix)
           TAG=${CIRCLE_TAG:1}
           TAG=${TAG:-latest}
-          docker build -t robocupssl/ssl-vision-client:$TAG .
-          docker login -u "${DOCKER_HUB_USERNAME}" -p "${DOCKER_HUB_PASSWORD}"
-          docker push robocupssl/ssl-vision-client:$TAG
-          docker build -t robocupssl/ssl-vision-cli:$TAG .
-          docker login -u "${DOCKER_HUB_USERNAME}" -p "${DOCKER_HUB_PASSWORD}"
-          docker push robocupssl/ssl-vision-cli:$TAG
+          for cmd in << pipeline.parameters.cmds >>; do
+            docker build -f ./cmd/${cmd}/Dockerfile -t robocupssl/${cmd}:${TAG} .
+            docker login -u "${DOCKER_HUB_USERNAME}" -p "${DOCKER_HUB_PASSWORD}"
+            docker push robocupssl/${cmd}:${TAG}
+          done
 
 workflows:
   version: 2
-  main:
+  build:
     jobs:
-      - frontend:
-          filters:
-            tags:
-              only: /.*/
-      - backend:
-          requires:
-            - frontend
-          filters:
-            tags:
-              only: /.*/
-      - publish-github-release:
+      - build_node
+      - test_go:
+          requires: [ build_node ]
+  release:
+    jobs:
+      - build_node:
+          filters: { branches: { ignore: /.*/ }, tags: { only: /^v.*/ } }
+      - build_go:
+          requires: [ build_node ]
+          filters: { branches: { ignore: /.*/ }, tags: { only: /^v.*/ } }
+      - publish_gh:
           context: github
-          requires:
-            - backend
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
-      - docker:
+          requires: [ build_go ]
+          filters: { branches: { ignore: /.*/ }, tags: { only: /^v.*/ } }
+  docker:
+    jobs:
+      - build_docker
+      - publish_docker:
           context: docker hub
-          filters:
-            branches:
-              only: master
-            tags:
-              only: /^v.*/
+          filters: { branches: { only: master }, tags: { only: /^v.*/ } }

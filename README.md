@@ -22,16 +22,26 @@ By default, the UI is available at http://localhost:8082
 
 ## Development
 
+### Requirements
+
 You need to install following dependencies first:
 
 * Go
 * Node
 
-See [.circleci/config.yml](.circleci/config.yml) for required versions.
+See [.circleci/config.yml](.circleci/config.yml) for compatible versions.
 
 ### Frontend
 
 See [frontend/README.md](frontend/README.md)
+
+### Build
+
+Build and install all binaries:
+
+```bash
+make install
+```
 
 ### Run
 
@@ -41,8 +51,10 @@ Run the backend:
 go run cmd/ssl-vision-client/main.go
 ```
 
-### Build self-contained release binary
+### Update generated protobuf code
 
-```bash
-./install.sh
+Generate the code for the `.proto` files after you've changed anything in a `.proto` file with:
+
+```shell
+make proto
 ```
