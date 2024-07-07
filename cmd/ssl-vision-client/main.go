@@ -4,6 +4,7 @@ import (
 	"flag"
 	"github.com/RoboCup-SSL/ssl-vision-client/frontend"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/client"
+	"github.com/RoboCup-SSL/ssl-vision-client/pkg/referee"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/tracked"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/vision"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/visualization"
@@ -16,6 +17,7 @@ var address = flag.String("address", ":8082", "The address on which the UI and A
 var visionAddress = flag.String("visionAddress", "224.5.23.2:10006", "The multicast address of ssl-vision, default: 224.5.23.2:10006")
 var trackedAddress = flag.String("trackedAddress", "224.5.23.2:10010", "The multicast address of trackers, default: 224.5.23.2:10010")
 var visualizationAddress = flag.String("visualizationAddress", "224.5.23.2:10012", "The multicast address of visualization frames, default: 224.5.23.2:10012")
+var refereeAddress = flag.String("refereeAddress", "224.5.23.1:10003", "The multicast address of the game controller, default: 224.5.23.1:10003")
 var skipInterfaces = flag.String("skipInterfaces", "", "Comma separated list of interface names to ignore when receiving multicast packets")
 var verbose = flag.Bool("verbose", false, "Verbose output")
 
@@ -34,28 +36,34 @@ func main() {
 }
 
 func setupVisionClient() {
-	receiver := vision.NewReceiver()
+	visionReceiver := vision.NewReceiver()
 	visualizationReceiver := visualization.NewReceiver()
 	trackedReceiver := tracked.NewReceiver()
+	refereeReceiver := referee.NewReceiver()
+
 	publisher := client.NewPublisher()
-	publisher.DetectionProvider = receiver.CombinedDetectionFrames
+	publisher.DetectionProvider = visionReceiver.CombinedDetectionFrames
 	publisher.TrackerProvider = trackedReceiver.TrackedFrames
-	publisher.GeometryProvider = geometryProvider(receiver)
+	publisher.GeometryProvider = geometryProvider(visionReceiver)
+	publisher.RefereeProvider = refereeReceiver.RefereeMsg
 	publisher.LineSegmentProvider = visualizationReceiver.GetLineSegments
 	publisher.CircleProvider = visualizationReceiver.GetCircles
 	http.HandleFunc("/api/vision", publisher.Handler)
 
 	skipIfis := parseSkipInterfaces()
-	receiver.MulticastServer.SkipInterfaces = skipIfis
-	receiver.MulticastServer.Verbose = *verbose
+	visionReceiver.MulticastServer.SkipInterfaces = skipIfis
+	visionReceiver.MulticastServer.Verbose = *verbose
 	visualizationReceiver.MulticastServer.SkipInterfaces = skipIfis
 	visualizationReceiver.MulticastServer.Verbose = *verbose
 	trackedReceiver.MulticastServer.SkipInterfaces = skipIfis
 	trackedReceiver.MulticastServer.Verbose = *verbose
+	refereeReceiver.MulticastServer.SkipInterfaces = skipIfis
+	refereeReceiver.MulticastServer.Verbose = *verbose
 
-	receiver.Start(*visionAddress)
+	visionReceiver.Start(*visionAddress)
 	visualizationReceiver.Start(*visualizationAddress)
 	trackedReceiver.Start(*trackedAddress)
+	refereeReceiver.Start(*refereeAddress)
 }
 
 func geometryProvider(receiver *vision.Receiver) func() *vision.SSL_GeometryData {

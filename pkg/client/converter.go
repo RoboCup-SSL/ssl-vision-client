@@ -243,6 +243,33 @@ func (p *Package) AddCircle(sourceId string, circle *visualization.Circle) {
 	})
 }
 
+func (p *Package) AddBallPlacementPos(pos *Point) {
+	p.Shapes = append(p.Shapes, Shape{OrderNumber: 3, Circle: &Circle{
+		Center: Point{
+			X: pos.X,
+			Y: -pos.Y,
+		},
+		Radius: 150,
+		Style: Style{
+			Stroke:      &black,
+			StrokeWidth: &lineWidth,
+			FillOpacity: &noFill,
+		},
+	}})
+	p.Shapes = append(p.Shapes, Shape{OrderNumber: 3, Circle: &Circle{
+		Center: Point{
+			X: pos.X,
+			Y: -pos.Y,
+		},
+		Radius: ballRadius,
+		Style: Style{
+			Stroke:      &black,
+			StrokeWidth: &lineWidth,
+			Fill:        &black,
+		},
+	}})
+}
+
 func rgb(rgb *visualization.RgbColor) *string {
 	if rgb == nil {
 		return nil

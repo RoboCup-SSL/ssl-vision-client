@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+	"github.com/RoboCup-SSL/ssl-vision-client/pkg/referee"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/tracked"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/vision"
 	"github.com/RoboCup-SSL/ssl-vision-client/pkg/visualization"
@@ -22,6 +23,7 @@ type Publisher struct {
 	DetectionProvider   func() *vision.SSL_DetectionFrame
 	TrackerProvider     func() map[string]*tracked.TrackerWrapperPacket
 	GeometryProvider    func() *vision.SSL_GeometryData
+	RefereeProvider     func() *referee.Referee
 	LineSegmentProvider func() map[string][]*visualization.LineSegment
 	CircleProvider      func() map[string][]*visualization.Circle
 }
@@ -153,6 +155,16 @@ func (p *Publisher) addVisualization(pack *Package) {
 		for _, circle := range circles {
 			pack.AddCircle(sourceId, circle)
 		}
+	}
+
+	refereeMsg := p.RefereeProvider()
+	if refereeMsg != nil && refereeMsg.DesignatedPosition != nil {
+		pack.AddBallPlacementPos(
+			&Point{
+				X: refereeMsg.DesignatedPosition.GetX(),
+				Y: refereeMsg.DesignatedPosition.GetY(),
+			},
+		)
 	}
 
 	pack.SortShapes()
