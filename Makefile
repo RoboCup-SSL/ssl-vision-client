@@ -28,3 +28,12 @@ run: frontend
 
 proto:
 	tools/generateProto.sh
+
+update-backend:
+	go get -v -u all
+
+update-frontend:
+	cd frontend && \
+	npm update --save
+
+update: update-backend update-frontend proto
