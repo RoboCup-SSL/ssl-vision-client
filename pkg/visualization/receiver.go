@@ -1,9 +1,10 @@
 package visualization
 
 import (
-	"github.com/RoboCup-SSL/ssl-vision-client/pkg/sslnet"
+	"github.com/RoboCup-SSL/ssl-go-tools/pkg/sslnet"
 	"google.golang.org/protobuf/proto"
 	"log"
+	"net"
 	"sync"
 	"time"
 )
@@ -15,19 +16,20 @@ type Receiver struct {
 	MulticastServer *sslnet.MulticastServer
 }
 
-func NewReceiver() (r *Receiver) {
+func NewReceiver(multicastAddress string) (r *Receiver) {
 	r = new(Receiver)
 	r.frames = map[string]*VisualizationFrame{}
 	r.receivedTimes = map[string]time.Time{}
-	r.MulticastServer = sslnet.NewMulticastServer(r.consumeMessage)
+	r.MulticastServer = sslnet.NewMulticastServer(multicastAddress)
+	r.MulticastServer.Consumer = r.consumeMessage
 	return
 }
 
-func (r *Receiver) Start(multicastAddress string) {
-	r.MulticastServer.Start(multicastAddress)
+func (r *Receiver) Start() {
+	r.MulticastServer.Start()
 }
 
-func (r *Receiver) consumeMessage(data []byte) {
+func (r *Receiver) consumeMessage(data []byte, _ *net.UDPAddr) {
 	frame, err := parseVisualizationFramePacket(data)
 	if err != nil {
 		log.Print("Could not parse referee frame: ", err)

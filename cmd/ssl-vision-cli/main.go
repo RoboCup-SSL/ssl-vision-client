@@ -22,8 +22,8 @@ var noGeometry = flag.Bool("noGeometry", false, "Print the geometry messages")
 func main() {
 	flag.Parse()
 
-	receiver := vision.NewReceiver()
-	receiver.Start(*visionAddress)
+	receiver := vision.NewReceiver(*visionAddress)
+	receiver.Start()
 
 	if *fullScreen {
 		printFullscreen(receiver)

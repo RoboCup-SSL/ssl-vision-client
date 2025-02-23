@@ -1,9 +1,10 @@
 package referee
 
 import (
-	"github.com/RoboCup-SSL/ssl-vision-client/pkg/sslnet"
+	"github.com/RoboCup-SSL/ssl-go-tools/pkg/sslnet"
 	"google.golang.org/protobuf/proto"
 	"log"
+	"net"
 	"sync"
 )
 
@@ -14,15 +15,18 @@ type Receiver struct {
 	ConsumeRefereeMsg func(msg *Referee)
 }
 
-func NewReceiver() (r *Receiver) {
+func NewReceiver(multicastAddress string) (r *Receiver) {
 	r = new(Receiver)
-	r.MulticastServer = sslnet.NewMulticastServer(r.consumeMessage)
-	r.ConsumeRefereeMsg = func(referee *Referee) {}
+	r.MulticastServer = sslnet.NewMulticastServer(multicastAddress)
+	r.MulticastServer.Consumer = r.consumeMessage
+	r.ConsumeRefereeMsg = func(referee *Referee) {
+		// noop by default
+	}
 	return
 }
 
-func (r *Receiver) Start(multicastAddress string) {
-	r.MulticastServer.Start(multicastAddress)
+func (r *Receiver) Start() {
+	r.MulticastServer.Start()
 }
 
 func (r *Receiver) RefereeMsg() (msg *Referee) {
@@ -31,7 +35,7 @@ func (r *Receiver) RefereeMsg() (msg *Referee) {
 	return r.lastRefereeMsg
 }
 
-func (r *Receiver) consumeMessage(data []byte) {
+func (r *Receiver) consumeMessage(data []byte, _ *net.UDPAddr) {
 	msg := new(Referee)
 	if err := proto.Unmarshal(data, msg); err != nil {
 		log.Print("Could not parse message: ", err)

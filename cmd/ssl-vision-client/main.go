@@ -36,10 +36,10 @@ func main() {
 }
 
 func setupVisionClient() {
-	visionReceiver := vision.NewReceiver()
-	visualizationReceiver := visualization.NewReceiver()
-	trackedReceiver := tracked.NewReceiver()
-	refereeReceiver := referee.NewReceiver()
+	visionReceiver := vision.NewReceiver(*visionAddress)
+	visualizationReceiver := visualization.NewReceiver(*visualizationAddress)
+	trackedReceiver := tracked.NewReceiver(*trackedAddress)
+	refereeReceiver := referee.NewReceiver(*refereeAddress)
 
 	publisher := client.NewPublisher()
 	publisher.DetectionProvider = visionReceiver.CombinedDetectionFrames
@@ -60,10 +60,10 @@ func setupVisionClient() {
 	refereeReceiver.MulticastServer.SkipInterfaces = skipIfis
 	refereeReceiver.MulticastServer.Verbose = *verbose
 
-	visionReceiver.Start(*visionAddress)
-	visualizationReceiver.Start(*visualizationAddress)
-	trackedReceiver.Start(*trackedAddress)
-	refereeReceiver.Start(*refereeAddress)
+	visionReceiver.Start()
+	visualizationReceiver.Start()
+	trackedReceiver.Start()
+	refereeReceiver.Start()
 }
 
 func geometryProvider(receiver *vision.Receiver) func() *vision.SSL_GeometryData {

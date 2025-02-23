@@ -1,9 +1,10 @@
 package tracked
 
 import (
-	"github.com/RoboCup-SSL/ssl-vision-client/pkg/sslnet"
+	"github.com/RoboCup-SSL/ssl-go-tools/pkg/sslnet"
 	"google.golang.org/protobuf/proto"
 	"log"
+	"net"
 	"sync"
 	"time"
 )
@@ -16,17 +17,20 @@ type Receiver struct {
 	ConsumeDetections func(frame *TrackerWrapperPacket)
 }
 
-func NewReceiver() (r *Receiver) {
+func NewReceiver(multicastAddress string) (r *Receiver) {
 	r = new(Receiver)
 	r.frames = map[string]*TrackerWrapperPacket{}
 	r.receivedTimes = map[string]time.Time{}
-	r.MulticastServer = sslnet.NewMulticastServer(r.consumeMessage)
-	r.ConsumeDetections = func(*TrackerWrapperPacket) {}
+	r.MulticastServer = sslnet.NewMulticastServer(multicastAddress)
+	r.MulticastServer.Consumer = r.consumeMessage
+	r.ConsumeDetections = func(*TrackerWrapperPacket) {
+		// noop by default
+	}
 	return
 }
 
-func (r *Receiver) Start(multicastAddress string) {
-	r.MulticastServer.Start(multicastAddress)
+func (r *Receiver) Start() {
+	r.MulticastServer.Start()
 }
 
 func (r *Receiver) TrackedFrames() map[string]*TrackerWrapperPacket {
@@ -41,7 +45,7 @@ func (r *Receiver) TrackedFrames() map[string]*TrackerWrapperPacket {
 	return frames
 }
 
-func (r *Receiver) consumeMessage(data []byte) {
+func (r *Receiver) consumeMessage(data []byte, _ *net.UDPAddr) {
 	message, err := parseVisionWrapperPacket(data)
 	if err != nil {
 		log.Print("Could not parse message: ", err)
