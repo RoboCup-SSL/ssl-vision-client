@@ -27,7 +27,7 @@ run: frontend
 	go run ./cmd/$(word 1,$(CMDS))
 
 proto:
-	tools/generateProto.sh
+	buf generate
 
 update-backend:
 	go get -v -u all

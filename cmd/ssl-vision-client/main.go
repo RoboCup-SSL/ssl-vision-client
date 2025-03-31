@@ -3,11 +3,11 @@ package main
 import (
 	"flag"
 	"github.com/RoboCup-SSL/ssl-vision-client/frontend"
-	"github.com/RoboCup-SSL/ssl-vision-client/pkg/client"
-	"github.com/RoboCup-SSL/ssl-vision-client/pkg/referee"
-	"github.com/RoboCup-SSL/ssl-vision-client/pkg/tracked"
-	"github.com/RoboCup-SSL/ssl-vision-client/pkg/vision"
-	"github.com/RoboCup-SSL/ssl-vision-client/pkg/visualization"
+	"github.com/RoboCup-SSL/ssl-vision-client/internal/client"
+	"github.com/RoboCup-SSL/ssl-vision-client/internal/gc"
+	"github.com/RoboCup-SSL/ssl-vision-client/internal/tracked"
+	"github.com/RoboCup-SSL/ssl-vision-client/internal/vision"
+	"github.com/RoboCup-SSL/ssl-vision-client/internal/visualization"
 	"log"
 	"net/http"
 	"strings"
@@ -39,12 +39,12 @@ func setupVisionClient() {
 	visionReceiver := vision.NewReceiver(*visionAddress)
 	visualizationReceiver := visualization.NewReceiver(*visualizationAddress)
 	trackedReceiver := tracked.NewReceiver(*trackedAddress)
-	refereeReceiver := referee.NewReceiver(*refereeAddress)
+	refereeReceiver := gc.NewReceiver(*refereeAddress)
 
 	publisher := client.NewPublisher()
 	publisher.DetectionProvider = visionReceiver.CombinedDetectionFrames
 	publisher.TrackerProvider = trackedReceiver.TrackedFrames
-	publisher.GeometryProvider = geometryProvider(visionReceiver)
+	publisher.GeometryProvider = vision.GeometryProvider(visionReceiver)
 	publisher.RefereeProvider = refereeReceiver.RefereeMsg
 	publisher.LineSegmentProvider = visualizationReceiver.GetLineSegments
 	publisher.CircleProvider = visualizationReceiver.GetCircles
@@ -64,32 +64,6 @@ func setupVisionClient() {
 	visualizationReceiver.Start()
 	trackedReceiver.Start()
 	refereeReceiver.Start()
-}
-
-func geometryProvider(receiver *vision.Receiver) func() *vision.SSL_GeometryData {
-	return func() *vision.SSL_GeometryData {
-		geometry := receiver.CurrentGeometry()
-		if geometry == nil {
-			return defaultGeometry()
-		}
-		return geometry
-	}
-}
-
-func defaultGeometry() (g *vision.SSL_GeometryData) {
-	g = new(vision.SSL_GeometryData)
-	g.Field = new(vision.SSL_GeometryFieldSize)
-	g.Field.FieldWidth = new(int32)
-	g.Field.FieldLength = new(int32)
-	g.Field.GoalDepth = new(int32)
-	g.Field.GoalWidth = new(int32)
-	g.Field.BoundaryWidth = new(int32)
-	*g.Field.FieldWidth = 9000
-	*g.Field.FieldLength = 12000
-	*g.Field.GoalDepth = 180
-	*g.Field.GoalWidth = 1000
-	*g.Field.BoundaryWidth = 300
-	return
 }
 
 func parseSkipInterfaces() []string {

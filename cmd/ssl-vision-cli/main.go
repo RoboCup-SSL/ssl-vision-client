@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/RoboCup-SSL/ssl-vision-client/pkg/vision"
+	"github.com/RoboCup-SSL/ssl-vision-client/internal/vision"
 	"google.golang.org/protobuf/encoding/prototext"
 	"log"
 	"math"
