@@ -7,7 +7,7 @@ export interface Request {
 export class VisionApi {
     private readonly apiPath = '/api/vision'
     private ws ?: WebSocket
-    private consumer: ((message: Field) => any)[] = []
+    private readonly consumer: ((message: Field) => any)[] = []
     private latestField ?: Field
 
     constructor() {
