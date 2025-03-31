@@ -1,11 +1,9 @@
 package client
 
 import (
-	"fmt"
 	"github.com/RoboCup-SSL/ssl-vision-client/internal/gc"
 	"github.com/RoboCup-SSL/ssl-vision-client/internal/tracked"
 	"github.com/RoboCup-SSL/ssl-vision-client/internal/vision"
-	"github.com/RoboCup-SSL/ssl-vision-client/internal/visualization"
 	"math"
 	"sort"
 	"strconv"
@@ -206,44 +204,6 @@ func (p *Package) SortShapes() {
 	sort.Sort(ShapesByOrderNumber(p.Shapes))
 }
 
-func (p *Package) AddLineSegment(sourceId string, lineSegment *visualization.LineSegment) {
-	p.Shapes = append(p.Shapes, Shape{
-		OrderNumber: lineSegment.Metadata.Order,
-		Line: &Line{
-			P1: Point{lineSegment.StartX * 1000, lineSegment.StartY * 1000},
-			P2: Point{lineSegment.EndX * 1000, lineSegment.EndY * 1000},
-			Metadata: Metadata{
-				SourceId:         sourceId,
-				Layer:            lineSegment.Metadata.Layer,
-				VisibleByDefault: lineSegment.Metadata.VisibleByDefault,
-			},
-			Style: Style{
-				Fill:   rgb(lineSegment.Metadata.ColorFill),
-				Stroke: rgb(lineSegment.Metadata.ColorStroke),
-			},
-		},
-	})
-}
-
-func (p *Package) AddCircle(sourceId string, circle *visualization.Circle) {
-	p.Shapes = append(p.Shapes, Shape{
-		OrderNumber: circle.Metadata.Order,
-		Circle: &Circle{
-			Center: Point{circle.CenterX * 1000, circle.CenterY * 1000},
-			Radius: circle.Radius * 1000,
-			Metadata: Metadata{
-				SourceId:         sourceId,
-				Layer:            circle.Metadata.Layer,
-				VisibleByDefault: circle.Metadata.VisibleByDefault,
-			},
-			Style: Style{
-				Fill:   rgb(circle.Metadata.ColorFill),
-				Stroke: rgb(circle.Metadata.ColorStroke),
-			},
-		},
-	})
-}
-
 func (p *Package) AddBallPlacementPos(pos *Point) {
 	p.Shapes = append(p.Shapes, Shape{OrderNumber: 3, Circle: &Circle{
 		Center: Point{
@@ -269,12 +229,4 @@ func (p *Package) AddBallPlacementPos(pos *Point) {
 			Fill:        &black,
 		},
 	}})
-}
-
-func rgb(rgb *visualization.RgbColor) *string {
-	if rgb == nil {
-		return nil
-	}
-	color := fmt.Sprintf("rgba(%d,%d,%d,%.5f)", rgb.R, rgb.G, rgb.B, rgb.A)
-	return &color
 }

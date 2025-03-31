@@ -5,7 +5,6 @@ import (
 	"github.com/RoboCup-SSL/ssl-vision-client/internal/gc"
 	"github.com/RoboCup-SSL/ssl-vision-client/internal/tracked"
 	"github.com/RoboCup-SSL/ssl-vision-client/internal/vision"
-	"github.com/RoboCup-SSL/ssl-vision-client/internal/visualization"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
@@ -19,13 +18,11 @@ const visionSource = "vision"
 type PublishType int
 
 type Publisher struct {
-	upgrader            websocket.Upgrader
-	DetectionProvider   func() *vision.SSL_DetectionFrame
-	TrackerProvider     func() map[string]*tracked.TrackerWrapperPacket
-	GeometryProvider    func() *vision.SSL_GeometryData
-	RefereeProvider     func() *gc.Referee
-	LineSegmentProvider func() map[string][]*visualization.LineSegment
-	CircleProvider      func() map[string][]*visualization.Circle
+	upgrader          websocket.Upgrader
+	DetectionProvider func() *vision.SSL_DetectionFrame
+	TrackerProvider   func() map[string]*tracked.TrackerWrapperPacket
+	GeometryProvider  func() *vision.SSL_GeometryData
+	RefereeProvider   func() *gc.Referee
 }
 
 func NewPublisher() (p Publisher) {
@@ -89,8 +86,6 @@ func (p *Publisher) Handler(w http.ResponseWriter, r *http.Request) {
 			pack.Sources[*frame.Uuid] = *frame.SourceName
 		}
 
-		p.addVisualization(pack)
-
 		payload, err := json.Marshal(*pack)
 		if err != nil {
 			return
@@ -138,34 +133,4 @@ func selectSourceId(trackedFrames map[string]*tracked.TrackerWrapperPacket, acti
 		return k
 	}
 	return visionSource
-}
-
-func (p *Publisher) addVisualization(pack *Package) {
-	allLineSegments := p.LineSegmentProvider()
-
-	for sourceId, lineSegments := range allLineSegments {
-		for _, lineSegment := range lineSegments {
-			pack.AddLineSegment(sourceId, lineSegment)
-		}
-	}
-
-	allCircles := p.CircleProvider()
-
-	for sourceId, circles := range allCircles {
-		for _, circle := range circles {
-			pack.AddCircle(sourceId, circle)
-		}
-	}
-
-	refereeMsg := p.RefereeProvider()
-	if refereeMsg != nil && refereeMsg.DesignatedPosition != nil {
-		pack.AddBallPlacementPos(
-			&Point{
-				X: refereeMsg.DesignatedPosition.GetX(),
-				Y: refereeMsg.DesignatedPosition.GetY(),
-			},
-		)
-	}
-
-	pack.SortShapes()
 }
