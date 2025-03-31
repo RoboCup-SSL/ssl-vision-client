@@ -1,28 +1,31 @@
 <script setup lang="ts">
-import {inject} from "vue";
-import type {VisionApi} from "@/providers/backend/VisionApi";
+import { inject } from 'vue'
+import type { VisionApi } from '@/providers/backend/VisionApi'
 
 const props = defineProps<{
-  sources: { string: string },
-  activeSource: string,
+  sources: { string: string }
+  activeSource: string
 }>()
 
 const visionApi = inject<VisionApi>('vision-api')
 function updateSource(newSource: string) {
-  visionApi?.Send({activeSourceId: newSource})
+  visionApi?.Send({ activeSourceId: newSource })
 
-  const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?sourceId=' + newSource;
-  window.history.pushState({path: newUrl}, '', newUrl);
+  const newUrl =
+    window.location.protocol +
+    '//' +
+    window.location.host +
+    window.location.pathname +
+    '?sourceId=' +
+    newSource
+  window.history.pushState({ path: newUrl }, '', newUrl)
 }
 </script>
 
 <template>
   <div id="source-selector">
     Sources:
-    <template
-      v-for="(sourceName, sourceId) in props.sources"
-      :key="'input-' + sourceId"
-    >
+    <template v-for="(sourceName, sourceId) in props.sources" :key="'input-' + sourceId">
       <input
         type="radio"
         :id="sourceId"
@@ -31,8 +34,7 @@ function updateSource(newSource: string) {
         :checked="sourceId === props.activeSource"
         @click="updateSource(sourceId)"
       />
-      <label
-        :for="sourceId">
+      <label :for="sourceId">
         {{ sourceName }}
       </label>
     </template>

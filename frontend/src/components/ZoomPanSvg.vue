@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const svg = ref<SVGElement>()
 const zoom = ref(1.0)
-const translation = ref({x: 0, y: 0})
-const activeTranslation = ref({x: 0, y: 0})
+const translation = ref({ x: 0, y: 0 })
+const activeTranslation = ref({ x: 0, y: 0 })
 const mouseDownPoint = ref<{
   x: number
   y: number
@@ -17,7 +17,7 @@ function onScroll(event: WheelEvent) {
   const newZoom = zoom.value - event.deltaY / 150
   if (newZoom < 1) {
     zoom.value = 1
-    translation.value = {x: 0, y: 0}
+    translation.value = { x: 0, y: 0 }
   } else {
     const dz = newZoom - zoom.value
     translation.value.x -= x * dz
@@ -38,7 +38,7 @@ function onMouseMove(event: MouseEvent) {
 }
 
 function onMouseDown(event: MouseEvent) {
-  mouseDownPoint.value = {x: event.clientX, y: event.clientY}
+  mouseDownPoint.value = { x: event.clientX, y: event.clientY }
 }
 
 function onMouseUp() {
@@ -47,7 +47,7 @@ function onMouseUp() {
       x: translation.value.x + activeTranslation.value.x,
       y: translation.value.y + activeTranslation.value.y,
     }
-    activeTranslation.value = {x: 0, y: 0}
+    activeTranslation.value = { x: 0, y: 0 }
     mouseDownPoint.value = null
   }
 }
@@ -55,7 +55,7 @@ function onMouseUp() {
 function onClick(event: KeyboardEvent) {
   if (event.key === ' ') {
     zoom.value = 1
-    translation.value = {x: 0, y: 0}
+    translation.value = { x: 0, y: 0 }
   }
 }
 
@@ -84,11 +84,7 @@ onBeforeUnmount(() => {
 <template>
   <svg width="100%" height="100%" ref="svg">
     <g :transform="transform">
-      <slot/>
+      <slot />
     </g>
   </svg>
 </template>
-
-<style scoped>
-
-</style>

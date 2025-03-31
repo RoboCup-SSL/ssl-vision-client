@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import {computed, type CSSProperties, onBeforeUnmount, onMounted, ref} from "vue"
-import type {Field, PathSegment, Point, ShapeStyle} from "@/field";
-import ZoomPanSvg from "@/components/ZoomPanSvg.vue";
+import { computed, type CSSProperties, onBeforeUnmount, onMounted, ref } from 'vue'
+import type { Field, PathSegment, Point, ShapeStyle } from '@/field'
+import ZoomPanSvg from '@/components/ZoomPanSvg.vue'
 
 const props = defineProps<{
-  field: Field,
+  field: Field
 }>()
 
 const wrapperDiv = ref<HTMLDivElement>()
@@ -20,14 +20,14 @@ const fieldWithBoundary = computed(() => {
 })
 
 function pathFromD(pd: PathSegment[]) {
-  let d = '';
-  for (let s of pd) {
-    d += s.type;
-    for (let a of s.args) {
+  let d = ''
+  for (const s of pd) {
+    d += s.type
+    for (const a of s.args) {
       d += ' ' + a
     }
   }
-  return d;
+  return d
 }
 
 function textTransform(p: Point) {
@@ -41,13 +41,13 @@ function shapeStyle(style: ShapeStyle): CSSProperties {
   const defStyle = {
     stroke: 'white',
     strokeWidth: 10,
-    fill: "",
+    fill: '',
     fillOpacity: 1,
-    textAnchor: "middle",
-    dominantBaseline: "central",
-    font: "bold 7em sans-serif",
+    textAnchor: 'middle',
+    dominantBaseline: 'central',
+    font: 'bold 7em sans-serif',
   }
-  return {...defStyle, ...style} as CSSProperties
+  return { ...defStyle, ...style } as CSSProperties
 }
 
 const viewBox = computed(() => {
@@ -63,7 +63,7 @@ const onWindowResized = () => {
   }
   const wl = props.field.fieldWidth / props.field.fieldLength
   const lw = props.field.fieldLength / props.field.fieldWidth
-  const meanFieldRatio = (wl + lw) / 2;
+  const meanFieldRatio = (wl + lw) / 2
   const canvasRatio = wrapperDiv.value.clientHeight / wrapperDiv.value.clientWidth
   rotateField.value = meanFieldRatio < canvasRatio
 }
@@ -98,7 +98,7 @@ onBeforeUnmount(() => {
             fill="green"
           />
 
-          <template v-for="(s,i) of props.field.shapes">
+          <template v-for="(s, i) of props.field.shapes">
             <line
               v-if="s.line"
               :key="'shape-' + i"
