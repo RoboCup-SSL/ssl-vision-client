@@ -1,4 +1,4 @@
-package client
+package app
 
 import (
 	"github.com/RoboCup-SSL/ssl-vision-client/internal/gc"
