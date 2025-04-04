@@ -1,4 +1,4 @@
-package client
+package app
 
 type Request struct {
 	ActiveSourceId string `json:"activeSourceId"`

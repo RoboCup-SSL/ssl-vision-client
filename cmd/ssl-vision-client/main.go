@@ -2,8 +2,6 @@ package main
 
 import (
 	"flag"
-	"github.com/RoboCup-SSL/ssl-vision-client/frontend"
-	"github.com/RoboCup-SSL/ssl-vision-client/internal/client"
 	"github.com/RoboCup-SSL/ssl-vision-client/internal/gc"
 	"github.com/RoboCup-SSL/ssl-vision-client/internal/tracked"
 	"github.com/RoboCup-SSL/ssl-vision-client/internal/vision"
@@ -22,28 +20,20 @@ var verbose = flag.Bool("verbose", false, "Verbose output")
 func main() {
 	flag.Parse()
 
-	setupVisionClient()
-	frontend.HandleUi()
-
 	log.Printf("UI is available at %v", formattedAddress())
 
-	err := http.ListenAndServe(*address, nil)
+	httpServer := setupServer()
+
+	err := httpServer.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func setupVisionClient() {
+func setupServer() *http.Server {
 	visionReceiver := vision.NewReceiver(*visionAddress)
 	trackedReceiver := tracked.NewReceiver(*trackedAddress)
 	refereeReceiver := gc.NewReceiver(*refereeAddress)
-
-	publisher := client.NewPublisher()
-	publisher.DetectionProvider = visionReceiver.CombinedDetectionFrames
-	publisher.TrackerProvider = trackedReceiver.TrackedFrames
-	publisher.GeometryProvider = vision.GeometryProvider(visionReceiver)
-	publisher.RefereeProvider = refereeReceiver.RefereeMsg
-	http.HandleFunc("/api/vision", publisher.Handler)
 
 	skipIfis := parseSkipInterfaces()
 	visionReceiver.MulticastServer.SkipInterfaces = skipIfis
@@ -56,6 +46,17 @@ func setupVisionClient() {
 	visionReceiver.Start()
 	trackedReceiver.Start()
 	refereeReceiver.Start()
+
+	srv := NewServer(
+		visionReceiver.CombinedDetectionFrames,
+		trackedReceiver.TrackedFrames,
+		vision.GeometryProvider(visionReceiver),
+		refereeReceiver.RefereeMsg,
+	)
+	return &http.Server{
+		Addr:    *address,
+		Handler: srv,
+	}
 }
 
 func parseSkipInterfaces() []string {
