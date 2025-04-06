@@ -7,12 +7,12 @@ managed:
     - file_option: go_package_prefix
       value: github.com/RoboCup-SSL/ssl-vision-client/internal
 plugins:
-  - remote: buf.build/bufbuild/es:v2.2.3
+  - remote: buf.build/bufbuild/es:v2.2.5
     out: frontend/src/proto
     opt:
       - target=ts
       - json_types=true
-  - remote: buf.build/protocolbuffers/go:v1.36.2
+  - remote: buf.build/protocolbuffers/go:v1.36.6
     out: internal
     opt:
       - paths=source_relative
