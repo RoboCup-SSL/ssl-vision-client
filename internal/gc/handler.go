@@ -16,9 +16,11 @@ func HandleReferee(RefereeProvider func() *Referee) http.Handler {
 			log.Println("Client for referee connected")
 			for {
 				packet := RefereeProvider()
-				if err := common.SendProtoMessage(conn, packet); err != nil {
-					log.Println(err)
-					return
+				if packet != nil {
+					if err := common.SendProtoMessage(conn, packet); err != nil {
+						log.Println(err)
+						return
+					}
 				}
 
 				time.Sleep(publishDt)
