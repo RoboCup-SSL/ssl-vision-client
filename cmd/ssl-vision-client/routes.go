@@ -16,7 +16,7 @@ func addRoutes(
 	RefereeProvider func() *gc.Referee,
 ) {
 	mux.Handle("/", frontend.HandleFrontend())
-	mux.Handle("/api/control", tracked.HandleTrackerControl(TrackerProvider))
+	mux.Handle("/api/tracker/sources", tracked.HandleTrackerSources(TrackerProvider))
 	mux.Handle("/api/tracker", tracked.HandleTracker(TrackerProvider))
 	mux.Handle("/api/vision/detection", vision.HandleVisionDetection(DetectionProvider))
 	mux.Handle("/api/vision/geometry", vision.HandleVisionGeometry(GeometryProvider))

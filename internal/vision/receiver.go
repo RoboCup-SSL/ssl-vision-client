@@ -71,12 +71,20 @@ func (r *Receiver) consumeMessage(data []byte, _ *net.UDPAddr) {
 func (r *Receiver) CombinedDetectionFrames() (f *SSL_DetectionFrame) {
 	r.mutex.Lock()
 	f = new(SSL_DetectionFrame)
+	f.FrameNumber = new(uint32)
+	f.CameraId = new(uint32)
+	f.TCapture = new(float64)
+	f.TSent = new(float64)
 	f.Balls = make([]*SSL_DetectionBall, 0)
 	f.RobotsYellow = make([]*SSL_DetectionRobot, 0)
 	f.RobotsBlue = make([]*SSL_DetectionRobot, 0)
 
 	r.cleanupDetections()
 	for _, b := range r.detections {
+		*f.FrameNumber = max(*f.FrameNumber, *b.FrameNumber)
+		*f.CameraId = 0
+		*f.TCapture = max(*f.TCapture, *b.TCapture)
+		*f.TSent = max(*f.TSent, *b.TSent)
 		f.Balls = append(f.Balls, b.Balls...)
 		f.RobotsYellow = append(f.RobotsYellow, b.RobotsYellow...)
 		f.RobotsBlue = append(f.RobotsBlue, b.RobotsBlue...)
