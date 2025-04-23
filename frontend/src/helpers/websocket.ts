@@ -1,4 +1,4 @@
-const determineWebSocketAddress = (path: string) => {
+export const determineWebSocketAddress = (path: string) => {
   const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:'
   return protocol + '//' + window.location.hostname + ':' + window.location.port + path
 }
@@ -11,7 +11,6 @@ export class ReconnectingWebSocket {
 
   constructor(path: string) {
     this.apiPath = path
-    this.connect()
   }
 
   public registerBytesConsumer(cb: (data: Uint8Array) => void) {
@@ -28,7 +27,7 @@ export class ReconnectingWebSocket {
     }
   }
 
-  private connect() {
+  public connect() {
     const ws = new WebSocket(determineWebSocketAddress(this.apiPath))
 
     ws.onmessage = async (e) => {
@@ -59,5 +58,11 @@ export class ReconnectingWebSocket {
     }
 
     this.ws = ws
+  }
+
+  public disconnect() {
+    if (this.ws) {
+      this.ws.close()
+    }
   }
 }

@@ -6,8 +6,6 @@ import (
 	"log"
 	"maps"
 	"net/http"
-	"slices"
-	"sync"
 	"time"
 )
 
@@ -24,20 +22,18 @@ type TrackerSourceRequest struct {
 func HandleTrackerSources(TrackerProvider func() map[string]*TrackerWrapperPacket) http.Handler {
 	return common.UpgradeToWebsocket(
 		func(r *http.Request, conn *websocket.Conn) {
-			var trackerSources []string
+			var trackerSourceMap map[string]string
 			for {
 				packet := TrackerProvider()
-				newTrackerSources := slices.Collect(maps.Keys(packet))
-				if !slices.Equal(newTrackerSources, trackerSources) {
-					trackerSourceMap := getTrackerSourceMap(packet)
+				newTrackerSourceMap := getTrackerSourceMap(packet)
+				if !maps.Equal(newTrackerSourceMap, trackerSourceMap) {
+					trackerSourceMap = newTrackerSourceMap
 					message := TrackerSourceResponse{TrackerSources: trackerSourceMap}
 
 					if err := common.SendJSONMessage(conn, message); err != nil {
 						log.Println(err)
 						return
 					}
-
-					trackerSources = newTrackerSources
 				}
 
 				time.Sleep(time.Millisecond * 300)
@@ -62,30 +58,13 @@ func getTrackerSourceMap(packet map[string]*TrackerWrapperPacket) map[string]str
 func HandleTracker(TrackerProvider func() map[string]*TrackerWrapperPacket) http.Handler {
 	return common.UpgradeToWebsocket(
 		func(r *http.Request, conn *websocket.Conn) {
-			var activeTrackerSource string
-			mutex := sync.Mutex{}
-
-			go func() {
-				for {
-					message := TrackerSourceRequest{}
-					if err := conn.ReadJSON(&message); err != nil {
-						log.Println("Error reading message:", err)
-						return
-					} else {
-						mutex.Lock()
-						activeTrackerSource = message.TrackerSource
-						mutex.Unlock()
-						log.Printf("Client selected tracker source %v", activeTrackerSource)
-					}
-				}
-			}()
+			activeTrackerSource := r.URL.Query().Get("source")
+			log.Printf("Client for tracker source '%v' connected", activeTrackerSource)
+			defer log.Printf("Client for tracker source '%v' disconnected", activeTrackerSource)
 
 			for {
 				packets := TrackerProvider()
-				mutex.Lock()
-				source := activeTrackerSource
-				mutex.Unlock()
-				if packet, ok := packets[source]; ok {
+				if packet, ok := packets[activeTrackerSource]; ok {
 					if err := common.SendProtoMessage(conn, packet.TrackedFrame); err != nil {
 						log.Println(err)
 						return

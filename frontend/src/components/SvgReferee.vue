@@ -25,7 +25,7 @@ const placementPosStyle = computed((): CSSProperties => {
   <circle
     v-if="referee.designatedPosition"
     :cx="referee.designatedPosition.x / 1000"
-    :cy="referee.designatedPosition.y / 1000"
+    :cy="-referee.designatedPosition.y / 1000"
     :r="0.15"
     :style="placementPosStyle" />
 
