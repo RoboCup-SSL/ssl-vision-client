@@ -11,9 +11,7 @@ import (
 
 func UpgradeToWebsocket(handleConnection func(*http.Request, *websocket.Conn)) http.Handler {
 	upgrader := websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
-		CheckOrigin:     func(*http.Request) bool { return true },
+		CheckOrigin: func(*http.Request) bool { return true },
 	}
 
 	return http.HandlerFunc(
@@ -28,10 +26,7 @@ func UpgradeToWebsocket(handleConnection func(*http.Request, *websocket.Conn)) h
 				if err := conn.Close(); err != nil {
 					log.Println("Could not close websocket connection: ", err)
 				}
-				log.Println("Client disconnected")
 			}()
-
-			log.Println("Client connected")
 
 			handleConnection(r, conn)
 		},

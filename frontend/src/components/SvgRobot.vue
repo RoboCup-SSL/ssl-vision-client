@@ -20,9 +20,9 @@ const robotId = computed(() => {
 const botShape = computed(() => {
   const orient2CornerAngle = Math.acos(center2Dribbler / radius)
   const botRightX = props.x + Math.cos(-props.orientation + orient2CornerAngle) * radius
-  const botRightY = props.y + Math.sin(-props.orientation + orient2CornerAngle) * radius
+  const botRightY = -props.y + Math.sin(-props.orientation + orient2CornerAngle) * radius
   const botLeftX = props.x + Math.cos(-props.orientation - orient2CornerAngle) * radius
-  const botLeftY = props.y + Math.sin(-props.orientation - orient2CornerAngle) * radius
+  const botLeftY = -props.y + Math.sin(-props.orientation - orient2CornerAngle) * radius
 
   return (
     `M ${botRightX} ${botRightY}` +

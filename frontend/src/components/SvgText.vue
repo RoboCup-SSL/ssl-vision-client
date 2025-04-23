@@ -30,7 +30,7 @@ const style = computed((): CSSProperties => {
 </script>
 
 <template>
-  <text :x="x" :y="y" :transform="textTransform(x, y)" :style="style">
+  <text :x="x" :y="-y" :transform="textTransform(x, -y)" :style="style">
     {{ text }}
   </text>
 </template>

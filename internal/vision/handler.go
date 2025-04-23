@@ -14,6 +14,8 @@ func HandleVisionDetection(DetectionProvider func() *SSL_DetectionFrame) http.Ha
 	return common.UpgradeToWebsocket(
 		func(r *http.Request, conn *websocket.Conn) {
 			log.Println("Client for vision detection connected")
+			defer log.Println("Client for vision detection disconnected")
+
 			for {
 				packet := DetectionProvider()
 				if err := common.SendProtoMessage(conn, packet); err != nil {
@@ -31,6 +33,8 @@ func HandleVisionGeometry(GeometryProvider func() *SSL_GeometryData) http.Handle
 	return common.UpgradeToWebsocket(
 		func(r *http.Request, conn *websocket.Conn) {
 			log.Println("Client for vision geometry connected")
+			defer log.Println("Client for vision geometry disconnected")
+
 			for {
 				packet := GeometryProvider()
 				if err := common.SendProtoMessage(conn, packet); err != nil {

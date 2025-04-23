@@ -27,9 +27,9 @@ const highlightStyle = computed((): CSSProperties => {
 </script>
 
 <template>
-  <circle :cx="x" :cy="y" :r="radius" :style="style" />
+  <circle :cx="x" :cy="-y" :r="radius" :style="style" />
 
   <!-- ball highlighter -->
-  <circle :cx="x" :cy="y" :r="0.5" :style="highlightStyle" />
+  <circle :cx="x" :cy="-y" :r="0.5" :style="highlightStyle" />
 
 </template>
