@@ -3,6 +3,7 @@ package vision
 import (
 	"github.com/RoboCup-SSL/ssl-vision-client/internal/common"
 	"github.com/gorilla/websocket"
+	"google.golang.org/protobuf/proto"
 	"log"
 	"net/http"
 	"time"
@@ -35,11 +36,15 @@ func HandleVisionGeometry(GeometryProvider func() *SSL_GeometryData) http.Handle
 			log.Println("Client for vision geometry connected")
 			defer log.Println("Client for vision geometry disconnected")
 
+			var lastPacket *SSL_GeometryData
 			for {
 				packet := GeometryProvider()
-				if err := common.SendProtoMessage(conn, packet); err != nil {
-					log.Println(err)
-					return
+				if lastPacket == nil || !proto.Equal(packet, lastPacket) {
+					if err := common.SendProtoMessage(conn, packet); err != nil {
+						log.Println(err)
+						return
+					}
+					lastPacket = packet
 				}
 
 				time.Sleep(publishDt)
