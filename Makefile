@@ -11,8 +11,8 @@ $(DOCKER_TARGETS): docker-%:
 
 .frontend: $(shell find frontend/ -type f -not -path "frontend/node_modules/*")
 	cd frontend && \
-	npm install && \
-	npm run build && \
+	pnpm install && \
+	pnpm run build && \
 	touch ../.frontend
 
 frontend: .frontend
@@ -34,6 +34,6 @@ update-backend:
 
 update-frontend:
 	cd frontend && \
-	npm update --save
+	pnpm update --save
 
 update: update-backend update-frontend proto
