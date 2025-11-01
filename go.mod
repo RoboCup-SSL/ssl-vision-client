@@ -2,7 +2,7 @@ module github.com/RoboCup-SSL/ssl-vision-client
 
 go 1.23.0
 
-toolchain go1.24.4
+toolchain go1.25.3
 
 require (
 	github.com/RoboCup-SSL/ssl-go-tools v1.8.4
