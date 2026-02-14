@@ -12,6 +12,7 @@ func NewServer(
 	TrackerProvider func() map[string]*tracked.TrackerWrapperPacket,
 	GeometryProvider func() *vision.SSL_GeometryData,
 	RefereeProvider func() *gc.Referee,
+	logfileFolder string,
 ) http.Handler {
 	mux := http.NewServeMux()
 	addRoutes(
@@ -20,6 +21,7 @@ func NewServer(
 		TrackerProvider,
 		GeometryProvider,
 		RefereeProvider,
+		logfileFolder,
 	)
 	return mux
 }
