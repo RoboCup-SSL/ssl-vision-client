@@ -14,6 +14,7 @@ func addRoutes(
 	TrackerProvider func() map[string]*tracked.TrackerWrapperPacket,
 	GeometryProvider func() *vision.SSL_GeometryData,
 	RefereeProvider func() *gc.Referee,
+	logfileFolder string,
 ) {
 	mux.Handle("/", frontend.HandleFrontend())
 	mux.Handle("/api/tracker/sources", tracked.HandleTrackerSources(TrackerProvider))
@@ -21,4 +22,5 @@ func addRoutes(
 	mux.Handle("/api/vision/detection", vision.HandleVisionDetection(DetectionProvider))
 	mux.Handle("/api/vision/geometry", vision.HandleVisionGeometry(GeometryProvider))
 	mux.Handle("/api/referee", gc.HandleReferee(RefereeProvider))
+	mux.Handle("/logs/", http.StripPrefix("/logs/", http.FileServer(http.Dir(logfileFolder))))
 }
