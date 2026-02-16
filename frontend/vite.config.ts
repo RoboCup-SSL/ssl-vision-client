@@ -18,6 +18,9 @@ export default defineConfig({
       '/api': {
         target: 'ws://localhost:8082',
         ws: true,
+      },
+      '/logs': {
+        target: 'ws://localhost:8082',
       }
     }
   },
