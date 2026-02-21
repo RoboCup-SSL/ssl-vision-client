@@ -21,7 +21,7 @@ const highlightStyle = computed((): CSSProperties => {
   return {
     stroke: 'orange',
     strokeWidth: 0.01,
-    fill: 'none'
+    fill: 'none',
   }
 })
 </script>
@@ -31,5 +31,4 @@ const highlightStyle = computed((): CSSProperties => {
 
   <!-- ball highlighter -->
   <circle :cx="x" :cy="-y" :r="0.5" :style="highlightStyle" />
-
 </template>

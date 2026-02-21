@@ -1,8 +1,7 @@
 <script setup lang="ts">
-
-import {computed} from "vue";
-import type {SSL_GeometryFieldSize} from "@/proto/vision/ssl_vision_geometry_pb.ts";
-import type {TeamJson} from "@/proto/gc/ssl_gc_common_pb.ts";
+import { computed } from 'vue'
+import type { SSL_GeometryFieldSize } from '@/proto/vision/ssl_vision_geometry_pb.ts'
+import type { TeamJson } from '@/proto/gc/ssl_gc_common_pb.ts'
 
 const props = defineProps<{
   field: SSL_GeometryFieldSize
@@ -31,7 +30,6 @@ const style = computed(() => {
     fill: 'none',
   }
 })
-
 </script>
 
 <template>
@@ -58,6 +56,4 @@ const style = computed(() => {
   />
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

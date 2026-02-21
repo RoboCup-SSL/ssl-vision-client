@@ -5,7 +5,6 @@ const props = defineProps<{
 
 const activeSource = defineModel()
 
-
 const updateActiveSource = (sourceId: string) => {
   activeSource.value = sourceId
 }
@@ -14,7 +13,10 @@ const updateActiveSource = (sourceId: string) => {
 <template>
   <div id="source-selector">
     Sources:
-    <template v-for="[sourceId, sourceName] of Object.entries(props.sources)" :key="'input-' + sourceId">
+    <template
+      v-for="[sourceId, sourceName] of Object.entries(props.sources)"
+      :key="'input-' + sourceId"
+    >
       <input
         type="radio"
         :id="sourceId"
