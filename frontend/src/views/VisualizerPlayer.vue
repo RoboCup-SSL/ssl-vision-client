@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { fromBinary } from '@bufbuild/protobuf'
 import { RefereeSchema } from '@/proto/gc/ssl_gc_referee_message_pb.ts'
 import { SSL_WrapperPacketSchema } from '@/proto/vision/ssl_vision_wrapper_pb.ts'
@@ -13,14 +14,74 @@ import SourceSelector from '@/components/SourceSelector.vue'
 import { defaultField } from '@/composables/vision.ts'
 import type { SSL_GeometryFieldSize } from '@/proto/vision/ssl_vision_geometry_pb.ts'
 
-const logBase = '/logs/2025-03-13_14-00_GROUP_PHASE_ER-Force-vs-Immortals'
-const logUrl = `${logBase}.log`
+const route = useRoute()
 
-const { index: visionIndex } = useLogFileIndex(`${logBase}.log.vision.idx`)
-const { index: refboxIndex } = useLogFileIndex(`${logBase}.log.refbox.idx`)
-const { index: trackerIndex } = useLogFileIndex(`${logBase}.log.tracker.idx`)
+const logUrlInput = ref('')
+const urlError = computed(() => {
+  const url = logUrlInput.value.trim()
+  if (url && !url.endsWith('.log')) return 'URL must end with .log'
+  return ''
+})
+
+watch(
+  () => route.query.url,
+  (urlParam) => {
+    if (typeof urlParam === 'string' && urlParam && !logUrlInput.value) {
+      logUrlInput.value = urlParam
+    }
+  },
+  { immediate: true },
+)
+
+const validLogUrl = computed(() => {
+  const url = logUrlInput.value.trim()
+  if (!url || !url.endsWith('.log')) return ''
+  return url
+})
+
+const logBase = computed(() => {
+  const url = validLogUrl.value
+  if (!url) return ''
+  return url.slice(0, -'.log'.length)
+})
+
+const logUrl = computed(() => validLogUrl.value)
+
+const { index: visionIndex } = useLogFileIndex(computed(() => logBase.value ? `${logBase.value}.log.vision.idx` : ''))
+const { index: refboxIndex } = useLogFileIndex(computed(() => logBase.value ? `${logBase.value}.log.refbox.idx` : ''))
+const { index: trackerIndex } = useLogFileIndex(computed(() => logBase.value ? `${logBase.value}.log.tracker.idx` : ''))
 
 const currentIndexPosition = ref(0)
+let initialPositionSet = false
+
+watch(logBase, () => {
+  currentIndexPosition.value = 0
+  initialPositionSet = false
+})
+
+const queryTimestampNs = computed<bigint | null>(() => {
+  const ts = typeof route.query.timestamp === 'string' ? route.query.timestamp : ''
+  if (!ts) return null
+  const ms = new Date(ts).getTime()
+  if (isNaN(ms)) return null
+  return BigInt(ms) * BigInt(1_000_000)
+})
+watch([visionIndex, queryTimestampNs], ([index, targetNs]) => {
+  if (initialPositionSet || !index || index.length === 0 || targetNs === null) return
+  initialPositionSet = true
+  let closest = 0
+  let minDiff =
+    targetNs > index[0]!.timestamp ? targetNs - index[0]!.timestamp : index[0]!.timestamp - targetNs
+  for (let i = 1; i < index.length; i++) {
+    const diff =
+      targetNs > index[i]!.timestamp ? targetNs - index[i]!.timestamp : index[i]!.timestamp - targetNs
+    if (diff < minDiff) {
+      minDiff = diff
+      closest = i
+    }
+  }
+  currentIndexPosition.value = closest
+})
 
 const currentTimestamp = computed(() => {
   if (!visionIndex.value || visionIndex.value.length === 0) return BigInt(0)
@@ -130,7 +191,17 @@ const formatTimestamp = (ts: bigint): string => {
 <template>
   <div id="container">
     <div id="control">
-      <div v-if="visionIndex && visionIndex.length > 0" class="slider-container">
+      <div class="url-input-container">
+        <input
+          v-model="logUrlInput"
+          type="text"
+          placeholder="Enter log file URL (must end with .log)"
+          class="url-input"
+          :class="{ 'url-input-error': urlError }"
+        />
+        <span v-if="urlError" class="url-error">{{ urlError }}</span>
+      </div>
+      <div v-if="validLogUrl && visionIndex && visionIndex.length > 0" class="slider-container">
         <label>
           Timestamp: {{ formatTimestamp(currentTimestamp) }} ({{ currentIndexPosition + 1 }} /
           {{ visionIndex.length }})
@@ -147,7 +218,7 @@ const formatTimestamp = (ts: bigint): string => {
           <span>{{ formatTimestamp(maxTimestamp) }}</span>
         </div>
       </div>
-      <div v-else>Loading index...</div>
+      <div v-else-if="validLogUrl">Loading index...</div>
     </div>
     <div id="content">
       <FieldVisualizer :field="field">
@@ -174,6 +245,31 @@ const formatTimestamp = (ts: bigint): string => {
 #control {
   width: 100%;
   margin-bottom: 20px;
+}
+
+.url-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.url-input {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.url-input-error {
+  border-color: #e53e3e;
+}
+
+.url-error {
+  font-size: 12px;
+  color: #e53e3e;
 }
 
 .slider-container {
