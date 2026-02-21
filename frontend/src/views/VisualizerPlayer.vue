@@ -9,6 +9,7 @@ import FieldVisualizer from '@/components/FieldVisualizer.vue'
 import SvgVision from '@/components/SvgVision.vue'
 import SvgReferee from '@/components/SvgReferee.vue'
 import SvgTracked from '@/components/SvgTracked.vue'
+import SourceSelector from '@/components/SourceSelector.vue'
 import { defaultField } from '@/composables/vision.ts'
 import type { SSL_GeometryFieldSize } from '@/proto/vision/ssl_vision_geometry_pb.ts'
 
@@ -87,17 +88,33 @@ const referee = computed(() => {
   }
 })
 
-const trackedFrame = computed(() => {
+const trackerWrapper = computed(() => {
   if (!trackerMessage.value) return undefined
   try {
-    const wrapper = fromBinary(
-      TrackerWrapperPacketSchema,
-      new Uint8Array(trackerMessage.value.data),
-    )
-    return wrapper.trackedFrame
+    return fromBinary(TrackerWrapperPacketSchema, new Uint8Array(trackerMessage.value.data))
   } catch {
     return undefined
   }
+})
+
+const trackerSources = ref<{ [uuid: string]: string }>({})
+
+watch(trackerWrapper, (wrapper) => {
+  if (wrapper?.uuid) {
+    trackerSources.value = { ...trackerSources.value, [wrapper.uuid]: wrapper.sourceName }
+  }
+})
+
+const activeSource = ref('vision')
+
+const sources = computed(() => {
+  return { vision: 'vision', ...trackerSources.value }
+})
+
+const trackedFrame = computed(() => {
+  if (!trackerWrapper.value) return undefined
+  if (activeSource.value !== trackerWrapper.value.uuid) return undefined
+  return trackerWrapper.value.trackedFrame
 })
 
 const handleSliderChange = (event: Event) => {
@@ -134,10 +151,14 @@ const formatTimestamp = (ts: bigint): string => {
     </div>
     <div id="content">
       <FieldVisualizer :field="field">
-        <SvgVision v-if="detectionFrame" :detection-frame="detectionFrame" />
+        <SvgVision
+          v-if="activeSource === 'vision' && detectionFrame"
+          :detection-frame="detectionFrame"
+        />
         <SvgReferee v-if="referee" :field="field" :referee="referee" />
         <SvgTracked v-if="trackedFrame" :tracked-frame="trackedFrame" />
       </FieldVisualizer>
+      <SourceSelector :sources="sources" v-model="activeSource" />
     </div>
   </div>
 </template>
