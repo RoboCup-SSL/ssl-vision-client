@@ -82,5 +82,4 @@ const lineStyle = computed(() => {
     :y2="-penaltyAreaMaxY"
     :style="lineStyle"
   />
-
 </template>

@@ -26,5 +26,4 @@ defineProps<{
     :id="s.robotId!.id"
     :team-color="s.robotId!.team === Team.YELLOW ? 'YELLOW' : 'BLUE'"
   />
-
 </template>
