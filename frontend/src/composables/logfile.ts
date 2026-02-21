@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { toValue } from 'vue'
 import type { MaybeRefOrGetter } from 'vue'
 import { computedAsync } from '@vueuse/core'
 
@@ -69,8 +70,7 @@ const queryLogfileMessage = async (url: string, offset: bigint): Promise<LogFile
 
 export const useLogFileIndex = (indexUrl: MaybeRefOrGetter<string>) => {
   const index = computedAsync(async () => {
-    const url = typeof indexUrl === 'function' ? indexUrl() : (typeof indexUrl === 'object' && 'value' in indexUrl ? indexUrl.value : indexUrl)
-    return await loadBinaryIndex(url)
+    return await loadBinaryIndex(toValue(indexUrl))
   }, [])
 
   return { index }
@@ -82,9 +82,9 @@ export const useLogFileMessageAtTimestamp = (
   targetTimestamp: MaybeRefOrGetter<bigint>,
 ) => {
   const message = computedAsync(async () => {
-    const indexValue = typeof index === 'function' ? index() : (typeof index === 'object' && 'value' in index ? index.value : index)
-    const timestamp = typeof targetTimestamp === 'function' ? targetTimestamp() : (typeof targetTimestamp === 'object' && 'value' in targetTimestamp ? targetTimestamp.value : targetTimestamp)
-    const url = typeof logUrl === 'function' ? logUrl() : (typeof logUrl === 'object' && 'value' in logUrl ? logUrl.value : logUrl)
+    const indexValue = toValue(index)
+    const timestamp = toValue(targetTimestamp)
+    const url = toValue(logUrl)
 
     if (!indexValue || indexValue.length === 0) {
       return undefined
