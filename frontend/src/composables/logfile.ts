@@ -97,14 +97,14 @@ export const useLogFileMessageAtTimestamp = (
     }
 
     let closestEntry = firstEntry
-    let minDiff = timestamp > closestEntry.timestamp
-      ? timestamp - closestEntry.timestamp
-      : closestEntry.timestamp - timestamp
+    let minDiff =
+      timestamp > closestEntry.timestamp
+        ? timestamp - closestEntry.timestamp
+        : closestEntry.timestamp - timestamp
 
     for (const entry of indexValue) {
-      const diff = timestamp > entry.timestamp
-        ? timestamp - entry.timestamp
-        : entry.timestamp - timestamp
+      const diff =
+        timestamp > entry.timestamp ? timestamp - entry.timestamp : entry.timestamp - timestamp
 
       if (diff < minDiff) {
         minDiff = diff
@@ -117,6 +117,3 @@ export const useLogFileMessageAtTimestamp = (
 
   return { message }
 }
-
-
-
