@@ -16,7 +16,7 @@ import {
 import { useWebSocket } from '@vueuse/core'
 import { determineWebSocketAddress } from '@/helpers/websocket.ts'
 
-const defaultField: SSL_GeometryFieldSize = {
+export const defaultField: SSL_GeometryFieldSize = {
   $typeName: 'SSL_GeometryFieldSize',
   fieldLength: 12000,
   fieldWidth: 9000,
