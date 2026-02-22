@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { fromBinary } from '@bufbuild/protobuf'
 import { RefereeSchema } from '@/proto/gc/ssl_gc_referee_message_pb.ts'
 import { SSL_WrapperPacketSchema } from '@/proto/vision/ssl_vision_wrapper_pb.ts'
@@ -15,6 +15,7 @@ import { defaultField } from '@/composables/vision.ts'
 import type { SSL_GeometryFieldSize } from '@/proto/vision/ssl_vision_geometry_pb.ts'
 
 const route = useRoute()
+const router = useRouter()
 
 const logUrlInput = ref('')
 const urlError = computed(() => {
@@ -32,6 +33,10 @@ watch(
   },
   { immediate: true },
 )
+
+watch(logUrlInput, (url) => {
+  router.replace({ query: { ...route.query, url: url || undefined } })
+})
 
 const validLogUrl = computed(() => {
   const url = logUrlInput.value.trim()
