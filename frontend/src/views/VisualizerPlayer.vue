@@ -93,16 +93,6 @@ const currentTimestamp = computed(() => {
   return visionIndex.value[currentIndexPosition.value]?.timestamp ?? BigInt(0)
 })
 
-const minTimestamp = computed(() => {
-  if (!visionIndex.value || visionIndex.value.length === 0) return BigInt(0)
-  return visionIndex.value[0]?.timestamp ?? BigInt(0)
-})
-
-const maxTimestamp = computed(() => {
-  if (!visionIndex.value || visionIndex.value.length === 0) return BigInt(0)
-  return visionIndex.value[visionIndex.value.length - 1]?.timestamp ?? BigInt(0)
-})
-
 const maxIndexPosition = computed(() => {
   if (!visionIndex.value) return 0
   return Math.max(0, visionIndex.value.length - 1)
@@ -187,10 +177,6 @@ const handleSliderChange = (event: Event) => {
   const target = event.target as HTMLInputElement
   currentIndexPosition.value = parseInt(target.value)
 }
-
-const formatTimestamp = (ts: bigint): string => {
-  return new Date(Number(ts) / 1000 / 1000).toISOString()
-}
 </script>
 
 <template>
@@ -206,24 +192,9 @@ const formatTimestamp = (ts: bigint): string => {
         />
         <span v-if="urlError" class="url-error">{{ urlError }}</span>
       </div>
-      <div v-if="validLogUrl && visionIndex && visionIndex.length > 0" class="slider-container">
-        <label>
-          Timestamp: {{ formatTimestamp(currentTimestamp) }} ({{ currentIndexPosition + 1 }} /
-          {{ visionIndex.length }})
-        </label>
-        <input
-          type="range"
-          min="0"
-          :max="maxIndexPosition"
-          :value="currentIndexPosition"
-          @input="handleSliderChange"
-        />
-        <div class="timestamp-range">
-          <span>{{ formatTimestamp(minTimestamp) }}</span>
-          <span>{{ formatTimestamp(maxTimestamp) }}</span>
-        </div>
+      <div v-if="validLogUrl && (!visionIndex || visionIndex.length === 0)">
+        Loading log file...
       </div>
-      <div v-else-if="validLogUrl">Loading index...</div>
     </div>
     <div id="content">
       <FieldVisualizer :field="field">
@@ -236,6 +207,15 @@ const formatTimestamp = (ts: bigint): string => {
       </FieldVisualizer>
       <SourceSelector :sources="sources" v-model="activeSource" />
     </div>
+    <div v-if="validLogUrl && visionIndex && visionIndex.length > 0" id="slider">
+      <input
+        type="range"
+        min="0"
+        :max="maxIndexPosition"
+        :value="currentIndexPosition"
+        @input="handleSliderChange"
+      />
+    </div>
   </div>
 </template>
 
@@ -243,20 +223,23 @@ const formatTimestamp = (ts: bigint): string => {
 #container {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  padding: 20px;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  padding: 8px;
+  box-sizing: border-box;
 }
 
 #control {
   width: 100%;
-  margin-bottom: 20px;
+  flex-shrink: 0;
+  margin: 6px 0;
 }
 
 .url-input-container {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-bottom: 12px;
 }
 
 .url-input {
@@ -277,31 +260,20 @@ const formatTimestamp = (ts: bigint): string => {
   color: #e53e3e;
 }
 
-.slider-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.slider-container label {
-  font-weight: bold;
-  font-size: 16px;
-}
-
-input[type='range'] {
-  width: 100%;
-}
-
-.timestamp-range {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: #666;
-}
-
 #content {
   width: 100%;
   flex: 1;
   overflow: hidden;
+  min-height: 0;
+}
+
+#slider {
+  width: 100%;
+  flex-shrink: 0;
+  margin: 6px 0;
+}
+
+input[type='range'] {
+  width: 100%;
 }
 </style>
