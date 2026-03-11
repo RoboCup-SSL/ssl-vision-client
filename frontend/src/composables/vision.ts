@@ -23,6 +23,7 @@ const defaultField: SSL_GeometryFieldSize = {
   goalWidth: 1800,
   goalDepth: 180,
   boundaryWidth: 300,
+  boundaryWidthGoalLine: 600,
   penaltyAreaDepth: 1800,
   penaltyAreaWidth: 3600,
   centerCircleRadius: 500,
@@ -31,6 +32,7 @@ const defaultField: SSL_GeometryFieldSize = {
   goalHeight: 155,
   ballRadius: 21.5,
   maxRobotRadius: 90,
+  goalSubstitutionAreaWidth: 300,
   fieldLines: [],
   fieldArcs: [],
 }

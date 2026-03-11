@@ -14,9 +14,9 @@ provide('rotate-field', rotateField)
 
 const fieldWithBoundary = computed(() => {
   return {
-    minX: -(props.field.fieldLength / 2 + props.field.boundaryWidth) / 1000,
+    minX: -(props.field.fieldLength / 2 + props.field.boundaryWidthGoalLine) / 1000,
     minY: -(props.field.fieldWidth / 2 + props.field.boundaryWidth) / 1000,
-    width: (props.field.fieldLength + props.field.boundaryWidth * 2) / 1000,
+    width: (props.field.fieldLength + props.field.boundaryWidthGoalLine * 2) / 1000,
     height: (props.field.fieldWidth + props.field.boundaryWidth * 2) / 1000,
   }
 })
