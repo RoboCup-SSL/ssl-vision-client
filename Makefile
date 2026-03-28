@@ -21,6 +21,7 @@ install: frontend
 	go install -v ./...
 
 test: frontend
+	cd frontend && pnpm run check
 	go test ./...
 
 run: frontend
