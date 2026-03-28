@@ -3,23 +3,27 @@
 ## Project Setup
 
 ```sh
-npm install
+pnpm install
 ```
 
-### Compile and Hot-Reload for Development
+## Development
 
 ```sh
-npm run dev
+pnpm dev
 ```
 
-### Type-Check, Compile and Minify for Production
+## Scripts
 
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+| Script       | Description                                            |
+|--------------|--------------------------------------------------------|
+| `dev`        | Start development server with hot-reload               |
+| `build`      | Build for production                                   |
+| `preview`    | Preview production build                               |
+| `type-check` | Run TypeScript type checking                           |
+| `lint`       | Check for linting errors                               |
+| `lint:fix`   | Auto-fix linting errors                                |
+| `format`     | Check code formatting                                  |
+| `format:fix` | Auto-fix code formatting                               |
+| `test`       | Run tests in watch mode                                |
+| `test:run`   | Run tests once                                         |
+| `check`      | Run all checks (type-check, lint, format, test, build) |

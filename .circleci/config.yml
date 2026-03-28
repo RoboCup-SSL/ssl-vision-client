@@ -12,13 +12,20 @@ jobs:
     steps:
       - checkout
       - run:
+          name: "Install pnpm"
+          command: npm install -g pnpm
+      - run:
           name: "Install dependencies"
           working_directory: frontend
-          command: npm install
+          command: pnpm install
+      - run:
+          name: "Test"
+          working_directory: frontend
+          command: pnpm test:run
       - run:
           name: "Build"
           working_directory: frontend
-          command: npm run build
+          command: pnpm run build
       - persist_to_workspace:
           root: .
           paths:
