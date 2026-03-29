@@ -1,0 +1,35 @@
+name: Check
+
+on:
+  push:
+    branches: [master, renovate/**]
+  pull_request:
+
+jobs:
+  check-node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: pnpm install
+        working-directory: frontend
+      - run: pnpm run check
+        working-directory: frontend
+
+  check-go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      # Create a fake index.html file to satisfy the frontend embed
+      - run: mkdir -p frontend/dist && touch frontend/dist/index.html
+      - run: go test -v ./...
