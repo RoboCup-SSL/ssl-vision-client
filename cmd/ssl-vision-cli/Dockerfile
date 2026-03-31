@@ -1,4 +1,4 @@
-FROM golang:1.24-alpine@sha256:8bee1901f1e530bfb4a7850aa7a479d17ae3a18beb6e09064ed54cfd245b7191 AS build_go
+FROM golang:1.26-alpine@sha256:2389ebfa5b7f43eeafbd6be0c3700cc46690ef842ad962f6c5bd6be49ed82039 AS build_go
 WORKDIR /work
 COPY . .
 RUN go install ./cmd/ssl-vision-cli
