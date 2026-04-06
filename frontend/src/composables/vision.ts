@@ -16,7 +16,14 @@ import {
 import { useWebSocket } from '@vueuse/core'
 import { determineWebSocketAddress } from '@/helpers/websocket.ts'
 
-const defaultField: SSL_GeometryFieldSize = {
+export const applyFieldDefaults = (field: SSL_GeometryFieldSize): SSL_GeometryFieldSize => {
+  if (!field.boundaryWidthGoalLine) {
+    field.boundaryWidthGoalLine = field.boundaryWidth
+  }
+  return field
+}
+
+export const defaultField: SSL_GeometryFieldSize = {
   $typeName: 'SSL_GeometryFieldSize',
   fieldLength: 12000,
   fieldWidth: 9000,
@@ -59,7 +66,7 @@ export const useVisionGeometry = () => {
 
   const field = computed(() => {
     if (message.value && message.value.field) {
-      return message.value.field
+      return applyFieldDefaults(message.value.field)
     }
     return defaultField
   })

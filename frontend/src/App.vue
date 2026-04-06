@@ -1,7 +1,5 @@
-<script setup lang="ts">
-import FieldVisualizerVision from '@/components/FieldVisualizerVision.vue'
-</script>
+<script setup lang="ts"></script>
 
 <template>
-  <FieldVisualizerVision />
+  <RouterView />
 </template>
