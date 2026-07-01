@@ -11,7 +11,7 @@ COPY --from=build_node /frontend/dist frontend/dist
 RUN go install ./cmd/ssl-vision-client
 
 # Start fresh from a smaller image
-FROM alpine:3@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11
+FROM alpine:3@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
 COPY --from=build_go /go/bin/ssl-vision-client /app
 USER 1000
 ENTRYPOINT ["/app"]
