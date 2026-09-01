@@ -4,7 +4,7 @@ WORKDIR /frontend
 RUN corepack enable && pnpm install --frozen-lockfile
 RUN corepack enable && pnpm run build
 
-FROM golang:1.26-alpine@sha256:0178a641fbb4858c5f1b48e34bdaabe0350a330a1b1149aabd498d0699ff5fb2 AS build_go
+FROM golang:1.26-alpine@sha256:28d89ee9cc0ff9fec75c82ca201e6bf7fdf9a679d4b7b24dfa04f2bb766bb468 AS build_go
 WORKDIR /work
 COPY . .
 COPY --from=build_node /frontend/dist frontend/dist
