@@ -8,7 +8,7 @@ require (
 	github.com/RoboCup-SSL/ssl-go-tools v1.12.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/pkg/errors v0.9.1
-	google.golang.org/protobuf v1.36.11
+	google.golang.org/protobuf v1.36.12
 )
 
 require (
